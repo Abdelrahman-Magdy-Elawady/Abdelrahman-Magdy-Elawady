@@ -47,7 +47,7 @@
 
 ## 🎮 Play my game — Tower Jump
 
-<a href="https://tower-jump-pi.vercel.app/"><img src="./tower-jump.gif" align="left" width="190" alt="Tower Jump gameplay — click to play" /></a>
+<a href="https://tower-jump-pi.vercel.app/"><img src="./tower-jump.gif" align="left" width="190" hspace="20" alt="Tower Jump gameplay — click to play" /></a>
 
 <br />
 
