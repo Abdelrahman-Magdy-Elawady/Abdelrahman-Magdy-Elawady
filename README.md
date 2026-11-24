@@ -58,49 +58,49 @@
     <td><b>🎨 Styling & UI</b></td>
     <td>
       <img src="https://img.shields.io/badge/Tailwind%20CSS-161b22?style=for-the-badge&logo=tailwindcss&logoColor=06B6D4" alt="Tailwind CSS" />
-      <img src="https://img.shields.io/badge/MUI-161b22?style=for-the-badge&logo=mui&logoColor=007FFF" alt="MUI" />
-      <img src="https://img.shields.io/badge/shadcn%2Fui-161b22?style=for-the-badge&logo=shadcnui&logoColor=ffffff" alt="shadcn/ui" />
-      <img src="https://img.shields.io/badge/Radix%20UI-161b22?style=for-the-badge&logo=radixui&logoColor=ffffff" alt="Radix UI" />
-      <img src="https://img.shields.io/badge/Emotion-161b22?style=for-the-badge" alt="Emotion" />
-      <img src="https://img.shields.io/badge/Sass-161b22?style=for-the-badge&logo=sass&logoColor=CC6699" alt="Sass" />
+      <img src="https://img.shields.io/badge/MUI-161b22?style=for-the-badge&cacheSeconds=86400&logo=mui&logoColor=007FFF" alt="MUI" />
+      <img src="https://img.shields.io/badge/shadcn%2Fui-161b22?style=for-the-badge&cacheSeconds=86400&logo=shadcnui&logoColor=ffffff" alt="shadcn/ui" />
+      <img src="https://img.shields.io/badge/Radix%20UI-161b22?style=for-the-badge&cacheSeconds=86400&logo=radixui&logoColor=ffffff" alt="Radix UI" />
+      <img src="https://img.shields.io/badge/Emotion-161b22?style=for-the-badge&cacheSeconds=86400" alt="Emotion" />
+      <img src="https://img.shields.io/badge/Sass-161b22?style=for-the-badge&cacheSeconds=86400&logo=sass&logoColor=CC6699" alt="Sass" />
     </td>
   </tr>
   <tr>
     <td><b>🎬 Motion</b></td>
     <td>
-      <img src="https://img.shields.io/badge/GSAP-161b22?style=for-the-badge&logo=greensock&logoColor=88CE02" alt="GSAP" />
-      <img src="https://img.shields.io/badge/Framer%20Motion-161b22?style=for-the-badge&logo=framer&logoColor=ffffff" alt="Framer Motion" />
-      <img src="https://img.shields.io/badge/Lenis-161b22?style=for-the-badge" alt="Lenis" />
-      <img src="https://img.shields.io/badge/Swiper-161b22?style=for-the-badge&logo=swiper&logoColor=6332F6" alt="Swiper" />
-      <img src="https://img.shields.io/badge/Embla%20Carousel-161b22?style=for-the-badge" alt="Embla Carousel" />
+      <img src="https://img.shields.io/badge/GSAP-161b22?style=for-the-badge&cacheSeconds=86400&logo=greensock&logoColor=88CE02" alt="GSAP" />
+      <img src="https://img.shields.io/badge/Framer%20Motion-161b22?style=for-the-badge&cacheSeconds=86400&logo=framer&logoColor=ffffff" alt="Framer Motion" />
+      <img src="https://img.shields.io/badge/Lenis-161b22?style=for-the-badge&cacheSeconds=86400" alt="Lenis" />
+      <img src="https://img.shields.io/badge/Swiper-161b22?style=for-the-badge&cacheSeconds=86400&logo=swiper&logoColor=6332F6" alt="Swiper" />
+      <img src="https://img.shields.io/badge/Embla%20Carousel-161b22?style=for-the-badge&cacheSeconds=86400" alt="Embla Carousel" />
     </td>
   </tr>
   <tr>
     <td><b>🧠 State, Forms & Data</b></td>
     <td>
-      <img src="https://img.shields.io/badge/Redux%20Toolkit-161b22?style=for-the-badge&logo=redux&logoColor=764ABC" alt="Redux Toolkit" />
-      <img src="https://img.shields.io/badge/React%20Hook%20Form-161b22?style=for-the-badge&logo=reacthookform&logoColor=EC5990" alt="React Hook Form" />
-      <img src="https://img.shields.io/badge/Zod-161b22?style=for-the-badge&logo=zod&logoColor=3E67B1" alt="Zod" />
-      <img src="https://img.shields.io/badge/Axios-161b22?style=for-the-badge&logo=axios&logoColor=5A29E4" alt="Axios" />
-      <img src="https://img.shields.io/badge/Socket.io-161b22?style=for-the-badge&logo=socketdotio&logoColor=ffffff" alt="Socket.io" />
+      <img src="https://img.shields.io/badge/Redux%20Toolkit-161b22?style=for-the-badge&cacheSeconds=86400&logo=redux&logoColor=764ABC" alt="Redux Toolkit" />
+      <img src="https://img.shields.io/badge/React%20Hook%20Form-161b22?style=for-the-badge&cacheSeconds=86400&logo=reacthookform&logoColor=EC5990" alt="React Hook Form" />
+      <img src="https://img.shields.io/badge/Zod-161b22?style=for-the-badge&cacheSeconds=86400&logo=zod&logoColor=3E67B1" alt="Zod" />
+      <img src="https://img.shields.io/badge/Axios-161b22?style=for-the-badge&cacheSeconds=86400&logo=axios&logoColor=5A29E4" alt="Axios" />
+      <img src="https://img.shields.io/badge/Socket.io-161b22?style=for-the-badge&cacheSeconds=86400&logo=socketdotio&logoColor=ffffff" alt="Socket.io" />
     </td>
   </tr>
   <tr>
     <td><b>🌍 i18n & RTL</b></td>
     <td>
-      <img src="https://img.shields.io/badge/next--intl-161b22?style=for-the-badge" alt="next-intl" />
-      <img src="https://img.shields.io/badge/i18next-161b22?style=for-the-badge&logo=i18next&logoColor=26A69A" alt="i18next" />
-      <img src="https://img.shields.io/badge/Arabic%20RTL%20UIs-161b22?style=for-the-badge" alt="Arabic RTL UIs" />
+      <img src="https://img.shields.io/badge/next--intl-161b22?style=for-the-badge&cacheSeconds=86400" alt="next-intl" />
+      <img src="https://img.shields.io/badge/i18next-161b22?style=for-the-badge&cacheSeconds=86400&logo=i18next&logoColor=26A69A" alt="i18next" />
+      <img src="https://img.shields.io/badge/Arabic%20RTL%20UIs-161b22?style=for-the-badge&cacheSeconds=86400" alt="Arabic RTL UIs" />
     </td>
   </tr>
   <tr>
     <td><b>📝 Content & Charts</b></td>
     <td>
-      <img src="https://img.shields.io/badge/TipTap-161b22?style=for-the-badge" alt="TipTap" />
-      <img src="https://img.shields.io/badge/React%20PDF-161b22?style=for-the-badge" alt="React PDF" />
-      <img src="https://img.shields.io/badge/Recharts-161b22?style=for-the-badge" alt="Recharts" />
-      <img src="https://img.shields.io/badge/Chart.js-161b22?style=for-the-badge&logo=chartdotjs&logoColor=FF6384" alt="Chart.js" />
-      <img src="https://img.shields.io/badge/Payload%20CMS-161b22?style=for-the-badge&logo=payloadcms&logoColor=ffffff" alt="Payload CMS" />
+      <img src="https://img.shields.io/badge/TipTap-161b22?style=for-the-badge&cacheSeconds=86400" alt="TipTap" />
+      <img src="https://img.shields.io/badge/React%20PDF-161b22?style=for-the-badge&cacheSeconds=86400" alt="React PDF" />
+      <img src="https://img.shields.io/badge/Recharts-161b22?style=for-the-badge&cacheSeconds=86400" alt="Recharts" />
+      <img src="https://img.shields.io/badge/Chart.js-161b22?style=for-the-badge&cacheSeconds=86400&logo=chartdotjs&logoColor=FF6384" alt="Chart.js" />
+      <img src="https://img.shields.io/badge/Payload%20CMS-161b22?style=for-the-badge&cacheSeconds=86400&logo=payloadcms&logoColor=ffffff" alt="Payload CMS" />
     </td>
   </tr>
   <tr>
@@ -110,16 +110,16 @@
       <img src="https://img.shields.io/badge/Express-161b22?style=for-the-badge&logo=express&logoColor=ffffff" alt="Express" />
       <img src="https://img.shields.io/badge/MongoDB-161b22?style=for-the-badge&logo=mongodb&logoColor=47A248" alt="MongoDB" />
       <img src="https://img.shields.io/badge/PostgreSQL-161b22?style=for-the-badge&logo=postgresql&logoColor=4169E1" alt="PostgreSQL" />
-      <img src="https://img.shields.io/badge/Supabase-161b22?style=for-the-badge&logo=supabase&logoColor=3FCF8E" alt="Supabase" />
+      <img src="https://img.shields.io/badge/Supabase-161b22?style=for-the-badge&cacheSeconds=86400&logo=supabase&logoColor=3FCF8E" alt="Supabase" />
     </td>
   </tr>
   <tr>
     <td><b>🎮 Side quests</b></td>
     <td>
-      <img src="https://img.shields.io/badge/Phaser-161b22?style=for-the-badge" alt="Phaser" />
-      <img src="https://img.shields.io/badge/PWA-161b22?style=for-the-badge&logo=pwa&logoColor=5A0FC8" alt="PWA" />
+      <img src="https://img.shields.io/badge/Phaser-161b22?style=for-the-badge&cacheSeconds=86400" alt="Phaser" />
+      <img src="https://img.shields.io/badge/PWA-161b22?style=for-the-badge&cacheSeconds=86400&logo=pwa&logoColor=5A0FC8" alt="PWA" />
       <img src="https://img.shields.io/badge/Python-161b22?style=for-the-badge&logo=python&logoColor=3776AB" alt="Python" />
-      <img src="https://img.shields.io/badge/Qt%20%2F%20PySide6-161b22?style=for-the-badge&logo=qt&logoColor=41CD52" alt="Qt / PySide6" />
+      <img src="https://img.shields.io/badge/Qt%20%2F%20PySide6-161b22?style=for-the-badge&cacheSeconds=86400&logo=qt&logoColor=41CD52" alt="Qt / PySide6" />
     </td>
   </tr>
   <tr>
@@ -127,14 +127,14 @@
     <td>
       <img src="https://img.shields.io/badge/Git-161b22?style=for-the-badge&logo=git&logoColor=F05032" alt="Git" />
       <img src="https://img.shields.io/badge/GitHub%20Actions-161b22?style=for-the-badge&logo=githubactions&logoColor=2088FF" alt="GitHub Actions" />
-      <img src="https://img.shields.io/badge/Vercel-161b22?style=for-the-badge&logo=vercel&logoColor=ffffff" alt="Vercel" />
-      <img src="https://img.shields.io/badge/ESLint-161b22?style=for-the-badge&logo=eslint&logoColor=4B32C3" alt="ESLint" />
-      <img src="https://img.shields.io/badge/Prettier-161b22?style=for-the-badge&logo=prettier&logoColor=F7B93E" alt="Prettier" />
-      <img src="https://img.shields.io/badge/Figma-161b22?style=for-the-badge&logo=figma&logoColor=F24E1E" alt="Figma" />
+      <img src="https://img.shields.io/badge/Vercel-161b22?style=for-the-badge&cacheSeconds=86400&logo=vercel&logoColor=ffffff" alt="Vercel" />
+      <img src="https://img.shields.io/badge/ESLint-161b22?style=for-the-badge&cacheSeconds=86400&logo=eslint&logoColor=4B32C3" alt="ESLint" />
+      <img src="https://img.shields.io/badge/Prettier-161b22?style=for-the-badge&cacheSeconds=86400&logo=prettier&logoColor=F7B93E" alt="Prettier" />
+      <img src="https://img.shields.io/badge/Figma-161b22?style=for-the-badge&cacheSeconds=86400&logo=figma&logoColor=F24E1E" alt="Figma" />
       <img src="https://img.shields.io/badge/Postman-161b22?style=for-the-badge&logo=postman&logoColor=FF6C37" alt="Postman" />
-      <img src="https://img.shields.io/badge/Jira-161b22?style=for-the-badge&logo=jira&logoColor=0052CC" alt="Jira" />
-      <img src="https://img.shields.io/badge/Claude%20Code-161b22?style=for-the-badge&logo=claude&logoColor=D97757" alt="Claude Code" />
-      <img src="https://img.shields.io/badge/Codex-161b22?style=for-the-badge" alt="Codex" />
+      <img src="https://img.shields.io/badge/Jira-161b22?style=for-the-badge&cacheSeconds=86400&logo=jira&logoColor=0052CC" alt="Jira" />
+      <img src="https://img.shields.io/badge/Claude%20Code-161b22?style=for-the-badge&cacheSeconds=86400&logo=claude&logoColor=D97757" alt="Claude Code" />
+      <img src="https://img.shields.io/badge/Codex-161b22?style=for-the-badge&cacheSeconds=86400" alt="Codex" />
     </td>
   </tr>
 </table>
