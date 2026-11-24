@@ -45,6 +45,29 @@
 
 ---
 
+## 🎮 Play my game — Tower Jump
+
+<p align="center">
+  <a href="https://tower-jump-pi.vercel.app/">
+    <img src="https://tower-jump-pi.vercel.app/cover.jpg" alt="Tower Jump — click to play" width="100%" />
+  </a>
+</p>
+
+<p align="center">
+  An Icy Tower-style climber I built with <b>Phaser + TypeScript</b>: wall jumps, combos, power-ups,<br />
+  and online races with up to 4 friends. Runs in the browser on desktop, phone and gamepad.
+</p>
+
+<p align="center">
+  <a href="https://tower-jump-pi.vercel.app/"><img src="./play.svg" alt="Play Tower Jump now" height="64" /></a>
+</p>
+
+<p align="center">
+  <sub>⌨️ <code>←</code> <code>→</code> run · <code>Space</code> jump · <code>S</code> power · <code>P</code> pause</sub>
+</p>
+
+---
+
 ## 🛠️ Tech Stack
 
 <p align="center">
