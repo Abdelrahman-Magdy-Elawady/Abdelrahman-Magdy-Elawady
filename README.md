@@ -1,6 +1,6 @@
 <!-- ============ HEADER ============ -->
 <p align="center">
-  <img width="100%" src="https://capsule-render.vercel.app/api?type=waving&color=0:0f172a,50:1e3a8a,100:06b6d4&height=220&section=header&text=Abdelrahman%20Magdy&fontSize=52&fontColor=ffffff&fontAlignY=36&desc=Frontend%20Developer%20%E2%80%A2%20React%20%26%20Next.js&descAlignY=58&descSize=18&animation=fadeIn" alt="header" />
+  <img width="100%" src="https://capsule-render.vercel.app/api?type=waving&color=0:0f172a,50:1e3a8a,100:06b6d4&height=220&section=header&text=Abdelrahman%20Magdy&fontSize=52&fontColor=ffffff&fontAlignY=36&desc=Frontend%20Developer%20-%20React%20and%20Next.js&descAlignY=58&descSize=18&animation=fadeIn" alt="header" />
 </p>
 
 <p align="center">
@@ -25,7 +25,7 @@ const abdelrahman = {
   stack: ["React", "Next.js", "JavaScript", "Tailwind CSS", "Redux"],
   currentlyLearning: ["Node.js", "Express", "MongoDB"], // on the way to full-stack
   workflow: "AI-assisted dev with Claude Code & Codex",
-  location: "Egypt 🇪🇬 — working remotely",
+  location: "Egypt — working remotely",
   funFact: "I bookmark every cool UI library I see 😅",
 };
 ```
