@@ -74,7 +74,7 @@
 <p align="center">
   <img src="https://skillicons.dev/icons?i=js,ts,html,css,sass,react,nextjs,vite,tailwind,materialui,redux&theme=dark&perline=11" alt="Core stack" />
   <br /><br />
-  <img src="https://skillicons.dev/icons?i=nodejs,express,mongodb,postgres,supabase,py,git,github,githubactions,vercel,figma,postman,vscode&theme=dark&perline=13" alt="Tools" />
+  <img src="https://skillicons.dev/icons?i=git,github,githubactions,vercel,figma,postman,vscode&theme=dark&perline=7" alt="Tools" />
 </p>
 
 <p align="center">
