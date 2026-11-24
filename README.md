@@ -47,24 +47,21 @@
 
 ## 🎮 Play my game — Tower Jump
 
-<p align="center">
-  <a href="https://tower-jump-pi.vercel.app/">
-    <img src="https://tower-jump-pi.vercel.app/cover.jpg" alt="Tower Jump — click to play" width="100%" />
-  </a>
-</p>
+<a href="https://tower-jump-pi.vercel.app/"><img src="./tower-jump.gif" align="left" width="190" alt="Tower Jump gameplay — click to play" /></a>
 
-<p align="center">
-  An Icy Tower-style climber I built with <b>Phaser + TypeScript</b>: wall jumps, combos, power-ups,<br />
-  and online races with up to 4 friends. Runs in the browser on desktop, phone and gamepad.
-</p>
+<br />
 
-<p align="center">
-  <a href="https://tower-jump-pi.vercel.app/"><img src="./play.svg" alt="Play Tower Jump now" height="64" /></a>
-</p>
+### 🌹 Climb the rose tower
 
-<p align="center">
-  <sub>⌨️ <code>←</code> <code>→</code> run · <code>Space</code> jump · <code>S</code> power · <code>P</code> pause</sub>
-</p>
+An **Icy Tower-style climber** I built with **Phaser + TypeScript**.<br />
+Wall jumps, combos, roses and power-ups — plus **online races with up to 4 friends**.<br />
+Plays right in your browser: desktop, phone or gamepad.
+
+<a href="https://tower-jump-pi.vercel.app/"><img src="./play.svg" alt="Play Tower Jump now" height="60" /></a>
+
+<sub>⌨️ <code>←</code> <code>→</code> run · <code>Space</code> jump · <code>S</code> power · <code>P</code> pause</sub>
+
+<br clear="left" />
 
 ---
 
