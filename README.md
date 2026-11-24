@@ -78,7 +78,7 @@
 </p>
 
 <p align="center">
-  <img src="./tech-stack.svg" alt="Tech stack by category — Styling & UI, Motion & Sliders, State, Data & Forms, UI Building Blocks, Charts & Editors, i18n & RTL, Game dev, Workflow" width="100%" />
+  <img src="./stack-card.svg" alt="Tech stack by category — Styling & UI, Motion, State, Data & Forms, Game dev, Workflow" width="100%" />
 </p>
 
 
