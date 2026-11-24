@@ -77,11 +77,6 @@
   <img src="https://skillicons.dev/icons?i=git,github,githubactions,vercel,figma,postman,vscode&theme=dark&perline=7" alt="Tools" />
 </p>
 
-<p align="center">
-  <img src="./stack-card.svg" alt="Tech stack by category — Styling & UI, Motion, State, Data & Forms, Game dev, Workflow" width="100%" />
-</p>
-
-
 ---
 
 ## 📊 GitHub stats
