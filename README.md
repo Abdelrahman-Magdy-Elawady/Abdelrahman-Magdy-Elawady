@@ -47,21 +47,25 @@
 
 ## 🎮 Play my game — Tower Jump
 
-<a href="https://tower-jump-pi.vercel.app/"><img src="./tower-jump.gif" align="left" width="190" hspace="20" alt="Tower Jump gameplay — click to play" /></a>
-
-<br />
-
-### 🌹 Climb the rose tower
-
-An **Icy Tower-style climber** I built with **Phaser + TypeScript**.<br />
-Wall jumps, combos, roses and power-ups — plus **online races with up to 4 friends**.<br />
-Plays right in your browser: desktop, phone or gamepad.
-
-<a href="https://tower-jump-pi.vercel.app/"><img src="./play.svg" alt="Play Tower Jump now" height="60" /></a>
-
-<sub>⌨️ <code>←</code> <code>→</code> run · <code>Space</code> jump · <code>S</code> power · <code>P</code> pause</sub>
-
-<br clear="left" />
+<table>
+  <tr>
+    <td width="210" align="center">
+      <a href="https://tower-jump-pi.vercel.app/"><img src="./tower-jump.gif" width="190" alt="Tower Jump gameplay — click to play" /></a>
+    </td>
+    <td>
+      <h3>🌹 Climb the rose tower</h3>
+      <p>
+        An <b>Icy Tower-style climber</b> I built with <b>Phaser + TypeScript</b>.<br />
+        Wall jumps, combos, roses and power-ups — plus <b>online races with up to 4 friends</b>.<br />
+        Plays right in your browser: desktop, phone or gamepad.
+      </p>
+      <p>
+        <a href="https://tower-jump-pi.vercel.app/"><img src="./play.svg" alt="Play Tower Jump now" height="60" /></a>
+      </p>
+      <sub>⌨️ <code>←</code> <code>→</code> run · <code>Space</code> jump · <code>S</code> power · <code>P</code> pause</sub>
+    </td>
+  </tr>
+</table>
 
 ---
 
