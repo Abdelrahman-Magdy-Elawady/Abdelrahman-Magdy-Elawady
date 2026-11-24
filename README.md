@@ -72,13 +72,13 @@
 ## 🛠️ Tech Stack
 
 <p align="center">
-  <img src="https://skillicons.dev/icons?i=js,ts,html,css,sass,react,nextjs,vite,tailwind,materialui,redux&theme=dark&perline=11" alt="Core stack" />
+  <img src="https://skillicons.dev/icons?i=js,ts,html,css,react,nextjs,vite,tailwind,materialui,redux&theme=dark&perline=10" alt="Core stack" />
   <br /><br />
   <img src="https://skillicons.dev/icons?i=git,github,githubactions,vercel,figma,postman,vscode&theme=dark&perline=7" alt="Tools" />
 </p>
 
 <p align="center">
-  <img src="./stack.svg" alt="Tech stack by category — Styling & UI, Motion, State & Forms, i18n & RTL, Content & Charts, Backend, Side quests, Workflow" width="100%" />
+  <img src="./stack.svg" alt="Tech stack by category — Styling & UI, Motion & Sliders, State, Data & Forms, UI Building Blocks, Charts & Editors, i18n & RTL, Game dev, Workflow" width="100%" />
 </p>
 
 
