@@ -1,37 +1,32 @@
 <p align="center">
-  <img src="./assets/hero.svg" width="100%" alt="Hi, I'm Abdelrahman. Frontend developer building fast, animated React and Next.js apps." />
+  <img src="./assets/hud/title.svg" width="100%" alt="Abdelrahman Magdy · Frontend developer · Press start" />
 </p>
 
 <p align="center">
-  <a href="https://www.linkedin.com/in/abdelrahman-magdy-elawady/"><img src="./assets/badge-linkedin.svg" height="40" alt="LinkedIn" /></a>
-  <a href="https://www.hackerrank.com/abdalrahman_mag1"><img src="./assets/badge-hackerrank.svg" height="40" alt="HackerRank @abdalrahman_mag1" /></a>
-  <a href="https://abdelrahman-magdy.vercel.app/"><img src="./assets/badge-site.svg" height="40" alt="abdelrahman-magdy.vercel.app" /></a>
+  <a href="https://www.linkedin.com/in/abdelrahman-magdy-elawady/"><img src="./assets/hud/btn-linkedin.svg" height="46" alt="LinkedIn" /></a>
+  <a href="https://www.hackerrank.com/abdalrahman_mag1"><img src="./assets/hud/btn-hackerrank.svg" height="46" alt="HackerRank" /></a>
+  <a href="https://abdelrahman-magdy.vercel.app/"><img src="./assets/hud/btn-portfolio.svg" height="46" alt="Portfolio" /></a>
 </p>
 
 <p align="center">
-  <img src="./assets/github.svg" width="100%" alt="On GitHub: contributions in the last year, current and longest streak, total contributions, public repos, active days and best day." />
+  <img src="./assets/hud/player.svg" width="100%" alt="Player stats: level, XP, current and longest streak, active days and best day" />
 </p>
 
 <p align="center">
-  <img src="./assets/graph-6m.svg" width="100%" alt="Contributions per day over the last 6 months" />
+  <img src="./assets/hud/climb.svg" width="100%" alt="Tower climb: contributions per week over the last 26 weeks" />
 </p>
 
 <p align="center">
-  <img src="./assets/graph-30d.svg" width="100%" alt="Contributions per day over the last 30 days" />
+  <img src="./assets/hud/banner-levels.svg" width="100%" alt="Select level" />
+  <a href="https://tower-jump-pi.vercel.app/"><img src="./assets/hud/level-1.svg" width="100%" alt="Level 1: Tower Jump, a browser game. Play now" /></a>
+  <img src="./assets/hud/level-2.svg" width="100%" alt="Level 2: Client apps, 10+ shipped" />
+  <a href="https://abdelrahman-magdy.vercel.app/"><img src="./assets/hud/level-3.svg" width="100%" alt="Level 3: Portfolio" /></a>
+  <img src="./assets/hud/level-4.svg" width="100%" alt="Level 4: Sticker Maker, a Windows app" />
 </p>
 
 <p align="center">
-  <img src="./assets/terminal.svg" width="100%" alt="whoami: abdelrahman, frontend developer, Egypt. Now: shipping client apps with Next.js, Redux Toolkit and GSAP; Tower Jump online races; learning Node.js." />
+  <img src="./assets/hud/banner-bonus.svg" width="100%" alt="Bonus stage" />
 </p>
-
-<img src="./assets/title-ship.svg" height="74" alt="What I ship" />
-
-<p align="center">
-  <a href="https://tower-jump-pi.vercel.app/"><img src="./assets/card-tower-jump.svg" width="49%" alt="Tower Jump: a browser game, play now" /></a><img src="./assets/card-client-work.svg" width="49%" alt="Client apps: 10+ shipped" />
-  <a href="https://abdelrahman-magdy.vercel.app/"><img src="./assets/card-portfolio.svg" width="49%" alt="Portfolio" /></a><img src="./assets/card-sticker-maker.svg" width="49%" alt="Sticker Maker: a Windows app" />
-</p>
-
-<img src="./assets/title-play.svg" height="74" alt="Play it" />
 
 <table>
   <tr>
@@ -53,7 +48,9 @@
   </tr>
 </table>
 
-<img src="./assets/title-toolkit.svg" height="74" alt="Daily toolkit" />
+<p align="center">
+  <img src="./assets/hud/banner-inventory.svg" width="100%" alt="Inventory" />
+</p>
 
 <p align="center">
   <img src="https://skillicons.dev/icons?i=js,ts,html,css,react,nextjs,vite,tailwind,materialui,redux&theme=dark&perline=10" alt="Core stack" />
@@ -62,5 +59,5 @@
 </p>
 
 <p align="center">
-  <sub>Drawn in my own README design system · numbers redrawn every night by a GitHub Action</sub>
+  <img src="./assets/hud/footer.svg" width="100%" alt="Saved game" />
 </p>
