@@ -1,31 +1,19 @@
 <p align="center">
-  <img src="./assets/hud/title.svg" width="100%" alt="Abdelrahman Magdy · Frontend developer · Press start" />
+  <img src="./assets/hud/intro.svg" width="100%" alt="Abdelrahman Magdy · Frontend developer · React & Next.js" />
 </p>
 
 <p align="center">
-  <a href="https://www.linkedin.com/in/abdelrahman-magdy-elawady/"><img src="./assets/hud/btn-linkedin.svg" height="46" alt="LinkedIn" /></a>
-  <a href="https://www.hackerrank.com/abdalrahman_mag1"><img src="./assets/hud/btn-hackerrank.svg" height="46" alt="HackerRank" /></a>
-  <a href="https://abdelrahman-magdy.vercel.app/"><img src="./assets/hud/btn-portfolio.svg" height="46" alt="Portfolio" /></a>
+  <a href="https://www.linkedin.com/in/abdelrahman-magdy-elawady/"><img src="./assets/hud/link-linkedin.svg" height="30" alt="LinkedIn" /></a>
+  <a href="https://www.hackerrank.com/abdalrahman_mag1"><img src="./assets/hud/link-hackerrank.svg" height="30" alt="HackerRank" /></a>
+  <a href="https://abdelrahman-magdy.vercel.app/"><img src="./assets/hud/link-portfolio.svg" height="30" alt="Portfolio" /></a>
 </p>
 
 <p align="center">
-  <img src="./assets/hud/player.svg" width="100%" alt="Player stats: level, XP, current and longest streak, active days and best day" />
+  <img src="./assets/hud/hud.svg" width="100%" alt="Level, XP, current streak, best day and contributions this year" />
 </p>
 
 <p align="center">
-  <img src="./assets/hud/climb.svg" width="100%" alt="Tower climb: contributions per week over the last 26 weeks" />
-</p>
-
-<p align="center">
-  <img src="./assets/hud/banner-levels.svg" width="100%" alt="Select level" />
-  <a href="https://tower-jump-pi.vercel.app/"><img src="./assets/hud/level-1.svg" width="100%" alt="Level 1: Tower Jump, a browser game. Play now" /></a>
-  <img src="./assets/hud/level-2.svg" width="100%" alt="Level 2: Client apps, 10+ shipped" />
-  <a href="https://abdelrahman-magdy.vercel.app/"><img src="./assets/hud/level-3.svg" width="100%" alt="Level 3: Portfolio" /></a>
-  <img src="./assets/hud/level-4.svg" width="100%" alt="Level 4: Sticker Maker, a Windows app" />
-</p>
-
-<p align="center">
-  <img src="./assets/hud/banner-bonus.svg" width="100%" alt="Bonus stage" />
+  <img src="./assets/hud/levels.svg" width="100%" alt="Levels: Tower Jump, Client apps, Portfolio, Sticker Maker" />
 </p>
 
 <table>
@@ -49,15 +37,7 @@
 </table>
 
 <p align="center">
-  <img src="./assets/hud/banner-inventory.svg" width="100%" alt="Inventory" />
-</p>
-
-<p align="center">
   <img src="https://skillicons.dev/icons?i=js,ts,html,css,react,nextjs,vite,tailwind,materialui,redux&theme=dark&perline=10" alt="Core stack" />
   <br /><br />
   <img src="https://skillicons.dev/icons?i=git,github,githubactions,vercel,figma,postman,vscode&theme=dark&perline=7" alt="Tools" />
-</p>
-
-<p align="center">
-  <img src="./assets/hud/footer.svg" width="100%" alt="Saved game" />
 </p>
