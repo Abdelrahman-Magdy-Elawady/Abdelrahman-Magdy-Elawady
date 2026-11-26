@@ -1,27 +1,23 @@
-// Builds the SVG cards for the profile README.
-// Runs every night in .github/workflows/readme-assets.yml, or locally:
-//   node scripts/build-assets.mjs            (fetches live numbers from GitHub)
-//   node scripts/build-assets.mjs --offline  (uses data/stats.json from the last run)
+// Draws the "game HUD" cards for the profile README.
+//   node scripts/build-assets.mjs            fetch live numbers from GitHub
+//   node scripts/build-assets.mjs --offline  reuse data/stats.json
 import { readFileSync, writeFileSync, mkdirSync } from "node:fs";
 import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
 
 const ROOT = join(dirname(fileURLToPath(import.meta.url)), "..");
 const LOGIN = "Abdelrahman-Magdy-Elawady";
-const OUT = join(ROOT, "assets");
+const OUT = join(ROOT, "assets", "hud");
 const DATA = join(ROOT, "data", "stats.json");
 mkdirSync(OUT, { recursive: true });
-mkdirSync(dirname(DATA), { recursive: true });
 
-// ---------------------------------------------------------------- data
+// ------------------------------------------------------------------ data
 
 async function getText(url) {
-  const res = await fetch(url, { headers: { "User-Agent": "readme-assets", Accept: "text/html" } });
+  const res = await fetch(url, { headers: { "User-Agent": "readme-hud" } });
   if (!res.ok) throw new Error(`${res.status} ${url}`);
   return res.text();
 }
-
-// The public contribution calendar (it includes private work when the profile shows it).
 async function calendar(from, to) {
   const q = from ? `?from=${from}&to=${to}` : "";
   const html = await getText(`https://github.com/users/${LOGIN}/contributions${q}`);
@@ -35,479 +31,349 @@ async function calendar(from, to) {
     const t = (tips[id] || "").match(/^(\d[\d,]*|No) contribution/);
     days.push({ date, count: t ? (t[1] === "No" ? 0 : Number(t[1].replace(/,/g, ""))) : 0 });
   }
-  days.sort((a, b) => (a.date < b.date ? -1 : 1));
-  return days;
+  return days.sort((a, b) => (a.date < b.date ? -1 : 1));
 }
-
-async function getJSON(url) {
-  const headers = { "User-Agent": "readme-assets", Accept: "application/vnd.github+json" };
-  if (process.env.GITHUB_TOKEN) headers.Authorization = `Bearer ${process.env.GITHUB_TOKEN}`;
-  const res = await fetch(url, { headers });
-  if (!res.ok) throw new Error(`${res.status} ${url}`);
-  return res.json();
-}
-
 async function liveStats() {
-  const user = await getJSON(`https://api.github.com/users/${LOGIN}`);
-  const lastYear = await calendar();
-  const firstYear = new Date(user.created_at).getUTCFullYear();
-  const thisYear = new Date().getUTCFullYear();
-  const all = new Map();
-  const years = {};
-  for (let y = firstYear; y <= thisYear; y++) {
-    const days = await calendar(`${y}-01-01`, `${y}-12-31`);
-    years[y] = days.reduce((s, d) => s + d.count, 0);
-    for (const d of days) all.set(d.date, d.count);
+  const headers = { "User-Agent": "readme-hud", Accept: "application/vnd.github+json" };
+  if (process.env.GITHUB_TOKEN) headers.Authorization = `Bearer ${process.env.GITHUB_TOKEN}`;
+  const user = await (await fetch(`https://api.github.com/users/${LOGIN}`, { headers })).json();
+  const days = await calendar();
+  const years = {}, all = new Map();
+  for (let y = new Date(user.created_at).getUTCFullYear(); y <= new Date().getUTCFullYear(); y++) {
+    const d = await calendar(`${y}-01-01`, `${y}-12-31`);
+    years[y] = d.reduce((s, x) => s + x.count, 0);
+    d.forEach((x) => all.set(x.date, x.count));
   }
-  for (const d of lastYear) all.set(d.date, d.count);
-  const allDays = [...all.entries()].sort().map(([date, count]) => ({ date, count }));
-  return { publicRepos: user.public_repos, years, days: lastYear, allDays };
+  days.forEach((x) => all.set(x.date, x.count));
+  return { publicRepos: user.public_repos, years, days, allDays: [...all].sort().map(([date, count]) => ({ date, count })) };
 }
+let S;
+if (process.argv.includes("--offline")) S = JSON.parse(readFileSync(DATA, "utf8"));
+else { S = await liveStats(); mkdirSync(dirname(DATA), { recursive: true }); writeFileSync(DATA, JSON.stringify(S)); }
 
-let stats;
-if (process.argv.includes("--offline")) {
-  stats = JSON.parse(readFileSync(DATA, "utf8"));
-} else {
-  stats = await liveStats();
-  writeFileSync(DATA, JSON.stringify(stats));
-}
-
-const today = new Date(stats.days.at(-1).date + "T00:00:00Z");
-const days = stats.days;
-const lastYearTotal = days.reduce((s, d) => s + d.count, 0);
-const total = Object.values(stats.years).reduce((s, n) => s + n, 0);
-const firstActiveYear = Object.keys(stats.years).find((y) => stats.years[y] > 0);
-
-function streaks(list) {
-  let longest = 0, run = 0, longestEnd = null;
-  for (const d of list) {
-    run = d.count > 0 ? run + 1 : 0;
-    if (run > longest) { longest = run; longestEnd = d.date; }
-  }
-  // Today may still be empty: then the streak runs up to yesterday.
-  let i = list.length - 1;
-  if (list[i].count === 0) i--;
-  let current = 0;
-  while (i >= 0 && list[i].count > 0) { current++; i--; }
-  const currentStart = current ? list[i + 1].date : null;
-  const longestStart = longestEnd ? shiftDate(longestEnd, -(longest - 1)) : null;
-  return { current, currentStart, longest, longestStart, longestEnd };
-}
-function shiftDate(iso, n) {
-  const d = new Date(iso + "T00:00:00Z");
-  d.setUTCDate(d.getUTCDate() + n);
-  return d.toISOString().slice(0, 10);
-}
-const st = streaks(stats.allDays || days);
+const days = S.days;
+const yearTotal = days.reduce((s, d) => s + d.count, 0);
+const total = Object.values(S.years).reduce((s, x) => s + x, 0);
 const activeDays = days.filter((d) => d.count > 0).length;
 const best = days.reduce((a, d) => (d.count > a.count ? d : a), days[0]);
-
-const MONTHS = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
-const fmtDay = (iso) => { const d = new Date(iso + "T00:00:00Z"); return `${d.getUTCDate()} ${MONTHS[d.getUTCMonth()]}`; };
-const fmtDate = (d) => `${d.getUTCDate()} ${MONTHS[d.getUTCMonth()]} ${d.getUTCFullYear()}`;
+function streaks(list) {
+  let longest = 0, run = 0;
+  for (const d of list) { run = d.count ? run + 1 : 0; longest = Math.max(longest, run); }
+  let i = list.length - 1, current = 0;
+  if (!list[i].count) i--;
+  while (i >= 0 && list[i].count) { current++; i--; }
+  return { current, longest };
+}
+const st = streaks(S.allDays || days);
+const LEVEL_XP = 1000;
+const level = Math.floor(total / LEVEL_XP) + 1;
+const xp = total % LEVEL_XP;
+const MONTHS = ["JAN", "FEB", "MAR", "APR", "MAY", "JUN", "JUL", "AUG", "SEP", "OCT", "NOV", "DEC"];
+const D = (iso) => new Date(iso + "T00:00:00Z");
 const n = (x) => x.toLocaleString("en-US");
+const today = D(days.at(-1).date);
 
-// ---------------------------------------------------------------- design system
+// ------------------------------------------------------------------ pixel font (5x7)
 
-const FONTS = Object.fromEntries(
-  ["display", "body", "mono", "monob"].map((k) => [k, readFileSync(join(OUT, "fonts", `${k}.woff`)).toString("base64")])
-);
-const METRICS = JSON.parse(readFileSync(join(OUT, "fonts", "metrics.json"), "utf8"));
-const FAMILY = { display: "AMDisplay", body: "AMBody", mono: "AMMono", monob: "AMMonoB" };
-
-function fontCSS(used) {
-  return used
-    .map((k) => `@font-face{font-family:${FAMILY[k]};src:url(data:font/woff;base64,${FONTS[k]}) format('woff')}`)
-    .join("");
-}
-function width(text, font, size) {
-  const m = METRICS[font];
-  let w = 0;
-  for (const ch of String(text)) w += m[ch] ?? 0.6;
-  return w * size;
-}
-const esc = (s) => String(s).replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
-
-const C = {
-  panel: "#15172e", panelEdge: "#24274a", dot: "#2b2f57", ink: "#f4f5ff", soft: "#b9bde6", mute: "#7d82b5",
-  blue: ["#3464d8", "#1f3d8f"], green: ["#1f9160", "#136040"], amber: ["#d0811f", "#8a520e"],
-  violet: ["#7445e0", "#472691"], teal: ["#148f8f", "#0b5c5c"], rose: ["#d2436a", "#86233e"],
-  coral: "#ff7a59", night: ["#232648", "#151730"],
+const G = {
+  A: "01110 10001 10001 11111 10001 10001 10001", B: "11110 10001 10001 11110 10001 10001 11110",
+  C: "01111 10000 10000 10000 10000 10000 01111", D: "11110 10001 10001 10001 10001 10001 11110",
+  E: "11111 10000 10000 11110 10000 10000 11111", F: "11111 10000 10000 11110 10000 10000 10000",
+  G: "01111 10000 10000 10011 10001 10001 01111", H: "10001 10001 10001 11111 10001 10001 10001",
+  I: "11111 00100 00100 00100 00100 00100 11111", J: "00111 00010 00010 00010 00010 10010 01100",
+  K: "10001 10010 10100 11000 10100 10010 10001", L: "10000 10000 10000 10000 10000 10000 11111",
+  M: "10001 11011 10101 10101 10001 10001 10001", N: "10001 11001 10101 10011 10001 10001 10001",
+  O: "01110 10001 10001 10001 10001 10001 01110", P: "11110 10001 10001 11110 10000 10000 10000",
+  Q: "01110 10001 10001 10001 10101 10010 01101", R: "11110 10001 10001 11110 10100 10010 10001",
+  S: "01111 10000 10000 01110 00001 00001 11110", T: "11111 00100 00100 00100 00100 00100 00100",
+  U: "10001 10001 10001 10001 10001 10001 01110", V: "10001 10001 10001 10001 10001 01010 00100",
+  W: "10001 10001 10001 10101 10101 10101 01010", X: "10001 10001 01010 00100 01010 10001 10001",
+  Y: "10001 10001 01010 00100 00100 00100 00100", Z: "11111 00001 00010 00100 01000 10000 11111",
+  0: "01110 10011 10101 10101 11001 10001 01110", 1: "00100 01100 00100 00100 00100 00100 01110",
+  2: "01110 10001 00001 00010 00100 01000 11111", 3: "11110 00001 00001 01110 00001 00001 11110",
+  4: "00010 00110 01010 10010 11111 00010 00010", 5: "11111 10000 11110 00001 00001 10001 01110",
+  6: "00110 01000 10000 11110 10001 10001 01110", 7: "11111 00001 00010 00100 01000 01000 01000",
+  8: "01110 10001 10001 01110 10001 10001 01110", 9: "01110 10001 10001 01111 00001 00010 01100",
+  " ": "00000 00000 00000 00000 00000 00000 00000", ".": "00000 00000 00000 00000 00000 01100 01100",
+  ",": "00000 00000 00000 00000 01100 00100 01000", ":": "00000 01100 01100 00000 01100 01100 00000",
+  "-": "00000 00000 00000 11111 00000 00000 00000", "/": "00001 00010 00010 00100 01000 01000 10000",
+  "+": "00000 00100 00100 11111 00100 00100 00000", "!": "00100 00100 00100 00100 00100 00000 00100",
+  "'": "00100 00100 01000 00000 00000 00000 00000", "?": "01110 10001 00001 00110 00100 00000 00100",
+  ">": "10000 11000 11100 11110 11100 11000 10000", "<": "00001 00011 00111 01111 00111 00011 00001",
+  "*": "00100 10101 01110 11111 01110 10101 00100", "#": "01010 11111 01010 01010 01010 11111 01010",
+  "%": "11001 11010 00010 00100 01000 01011 10011", "=": "00000 00000 11111 00000 11111 00000 00000",
+  "(": "00010 00100 01000 01000 01000 00100 00010", ")": "01000 00100 00010 00010 00010 00100 01000",
+  "★": "00100 00100 11111 01110 01110 11011 00000",
+  "&": "01100 10010 10100 01000 10101 10010 01101", "·": "00000 00000 00000 01100 01100 00000 00000",
 };
+const pxWidth = (text, s) => [...String(text).toUpperCase()].length * 6 * s - s;
+// One <path> per string: every lit pixel becomes a small square.
+function pixelText(text, x, y, s, fill, { anchor = "start", shadow = null, extra = "" } = {}) {
+  const w = pxWidth(text, s);
+  const x0 = anchor === "middle" ? x - w / 2 : anchor === "end" ? x - w : x;
+  let d = "";
+  [...String(text).toUpperCase()].forEach((ch, i) => {
+    const rows = (G[ch] || G["?"]).split(" ");
+    rows.forEach((row, r) => {
+      for (let c = 0; c < 5; c++) if (row[c] === "1") d += `M${x0 + (i * 6 + c) * s} ${y + r * s}h${s}v${s}h-${s}z`;
+    });
+  });
+  const sh = shadow ? `<path d="${d}" fill="${shadow}" transform="translate(${s} ${s})"/>` : "";
+  return `<g ${extra}>${sh}<path d="${d}" fill="${fill}"/></g>`;
+}
 
-function svgDoc(w, h, body, fonts = ["display", "body", "mono", "monob"]) {
-  return `<svg xmlns="http://www.w3.org/2000/svg" width="${w}" height="${h}" viewBox="0 0 ${w} ${h}">
-<defs><style>${fontCSS(fonts)}
-.d{font-family:${FAMILY.display},Poppins,'Segoe UI',sans-serif;font-weight:700}
-.b{font-family:${FAMILY.body},Poppins,'Segoe UI',sans-serif;font-weight:500}
-.m{font-family:${FAMILY.mono},'DejaVu Sans Mono',Consolas,monospace}
-.mb{font-family:${FAMILY.monob},'DejaVu Sans Mono',Consolas,monospace;font-weight:700}
-.pop{opacity:0;animation:pop .55s cubic-bezier(.2,1.4,.4,1) forwards}
-.fade{opacity:0;animation:fade .5s ease-out forwards}
-@keyframes pop{0%{opacity:0;transform:translateY(14px) scale(.96)}100%{opacity:1;transform:none}}
-@keyframes fade{to{opacity:1}}
-@media (prefers-reduced-motion:reduce){.pop,.fade{animation:none;opacity:1}}
+// ------------------------------------------------------------------ look
+
+const FONTS = Object.fromEntries(["body", "mono", "monob"].map((k) => [k, readFileSync(join(ROOT, "assets", "fonts", `${k}.woff`)).toString("base64")]));
+const P = {
+  night: "#0e0a1f", panel: "#160f2e", panel2: "#1f1640", line: "#3b2b6b",
+  gold: "#ffd166", rose: "#ff5f87", mint: "#4fe3a5", sky: "#7cc7ff", lilac: "#c9b8ff", ink: "#fff6e8", dim: "#a99cd6",
+};
+function doc(w, h, body, fonts = []) {
+  const ff = { body: "HB", mono: "HM", monob: "HMB" };
+  const faces = fonts.map((k) => `@font-face{font-family:${ff[k]};src:url(data:font/woff;base64,${FONTS[k]}) format('woff')}`).join("");
+  return `<svg xmlns="http://www.w3.org/2000/svg" width="${w}" height="${h}" viewBox="0 0 ${w} ${h}" shape-rendering="crispEdges">
+<style>${faces}
+.b{font-family:HB,Poppins,'Segoe UI',sans-serif;font-weight:500}.m{font-family:HM,'DejaVu Sans Mono',Consolas,monospace}.mb{font-family:HMB,'DejaVu Sans Mono',Consolas,monospace;font-weight:700}
+.blink{animation:blink 1.1s steps(1) infinite}@keyframes blink{50%{opacity:0}}
+.tw{animation:tw 2.4s ease-in-out infinite}@keyframes tw{50%{opacity:.25}}
+.in{opacity:0;animation:in .45s steps(4) forwards}@keyframes in{from{opacity:0;transform:translateX(-24px)}to{opacity:1;transform:none}}
+.grow{transform-box:fill-box;transform-origin:left;animation:grow 1.2s steps(12) forwards;transform:scaleX(0)}@keyframes grow{to{transform:scaleX(1)}}
+.rise{transform-box:fill-box;transform-origin:bottom;animation:rise .6s steps(6) forwards;transform:scaleY(0)}@keyframes rise{to{transform:scaleY(1)}}
+.hop{animation:hop .9s cubic-bezier(.3,0,.7,1) infinite alternate}@keyframes hop{to{transform:translateY(-22px)}}
+@media (prefers-reduced-motion:reduce){.blink,.tw,.hop{animation:none}.in,.grow,.rise{animation:none;opacity:1;transform:none}}
 </style>
-<pattern id="dots" width="16" height="16" patternUnits="userSpaceOnUse"><circle cx="2" cy="2" r="1.1" fill="${C.dot}"/></pattern>
-</defs>
 ${body}
 </svg>`;
 }
+// Pixel frame: a panel with notched corners and a double border, like an old RPG window.
+function frame(x, y, w, h, { fill = P.panel, edge = P.gold, inner = P.line, s = 4 } = {}) {
+  const notch = (X, Y, W, H, k) => `M${X + k} ${Y}h${W - 2 * k}v${k}h${k}v${H - 2 * k}h-${k}v${k}h-${W - 2 * k}v-${k}h-${k}v-${H - 2 * k}h${k}z`;
+  return `<path d="${notch(x, y, w, h, s)}" fill="${edge}"/>
+<path d="${notch(x + s, y + s, w - 2 * s, h - 2 * s, s)}" fill="${P.night}"/>
+<path d="${notch(x + 2 * s, y + 2 * s, w - 4 * s, h - 4 * s, s)}" fill="${fill}"/>
+<rect x="${x + 3 * s}" y="${y + 3 * s}" width="${w - 6 * s}" height="${s / 2}" fill="${inner}"/>`;
+}
+// Segmented bar like a health/XP meter.
+function meter(x, y, w, h, ratio, color, { seg = 10, delay = 0 } = {}) {
+  const cells = Math.floor(w / seg);
+  const lit = Math.round(cells * Math.max(0, Math.min(1, ratio)));
+  let out = `<rect x="${x - 3}" y="${y - 3}" width="${cells * seg + 3}" height="${h + 6}" fill="${P.night}"/>`;
+  for (let i = 0; i < cells; i++) out += `<rect x="${x + i * seg}" y="${y}" width="${seg - 3}" height="${h}" fill="${P.panel2}"/>`;
+  out += `<g class="grow" style="animation-delay:${delay}s">`;
+  for (let i = 0; i < lit; i++) out += `<rect x="${x + i * seg}" y="${y}" width="${seg - 3}" height="${h}" fill="${color}"/><rect x="${x + i * seg}" y="${y}" width="${seg - 3}" height="2" fill="#ffffff" opacity=".35"/>`;
+  return out + "</g>";
+}
+const heart = (x, y, s, c) => {
+  const rows = ["0110110", "1111111", "1111111", "0111110", "0011100", "0001000"];
+  let d = ""; rows.forEach((r, j) => [...r].forEach((b, i) => { if (b === "1") d += `M${x + i * s} ${y + j * s}h${s}v${s}h-${s}z`; }));
+  return `<path d="${d}" fill="${c}"/>`;
+};
+const coin = (x, y, s) => `<rect x="${x + s}" y="${y}" width="${3 * s}" height="${5 * s}" fill="${P.gold}"/><rect x="${x}" y="${y + s}" width="${5 * s}" height="${3 * s}" fill="${P.gold}"/><rect x="${x + 2 * s}" y="${y + s}" width="${s}" height="${3 * s}" fill="#b8860b"/>`;
+// Tiny climber sprite (the Tower Jump hero, abstracted).
+function sprite(x, y, s) {
+  const map = ["..kkk..", ".kkkkk.", ".kwkwk.", ".kkkkk.", "..rrr..", ".rrrrr.", "..k.k..", ".kk.kk."];
+  const col = { k: "#2b1d4f", w: P.ink, r: P.rose };
+  let out = "";
+  map.forEach((row, j) => [...row].forEach((c, i) => { if (col[c]) out += `<rect x="${x + i * s}" y="${y + j * s}" width="${s}" height="${s}" fill="${col[c]}"/>`; }));
+  return out;
+}
 
-// A rounded panel with the dotted background every card sits on.
-function panel(x, y, w, h, r = 22) {
-  return `<rect x="${x}" y="${y}" width="${w}" height="${h}" rx="${r}" fill="${C.panel}"/>
-<rect x="${x}" y="${y}" width="${w}" height="${h}" rx="${r}" fill="url(#dots)"/>
-<rect x="${x + 0.5}" y="${y + 0.5}" width="${w - 1}" height="${h - 1}" rx="${r}" fill="none" stroke="${C.panelEdge}"/>`;
-}
-// A chunky tile: colored face on a darker "ledge", optionally tilted.
-function tile(x, y, w, h, [face, ledge], { r = 16, tilt = 0, ledgeH = 6, stroke = true } = {}) {
-  const cx = x + w / 2, cy = y + h / 2;
-  return `<g transform="rotate(${tilt} ${cx} ${cy})">
-<rect x="${x}" y="${y + ledgeH}" width="${w}" height="${h}" rx="${r}" fill="${ledge}"/>
-<rect x="${x}" y="${y}" width="${w}" height="${h}" rx="${r}" fill="${face}"${stroke ? ` stroke="#ffffff" stroke-opacity=".14"` : ""}/>
-</g>`;
-}
-function chip(x, y, label, [face, ledge], { size = 13, font = "mb", padX = 11, h = 28, color = C.ink } = {}) {
-  const w = width(label, font === "mb" ? "monob" : font === "m" ? "mono" : font === "d" ? "display" : "body", size) + padX * 2;
-  return {
-    w,
-    svg: `${tile(x, y, w, h, [face, ledge], { r: 8, ledgeH: 3, stroke: false })}
-<text x="${x + w / 2}" y="${y + h / 2 + size * 0.36}" text-anchor="middle" class="${font}" font-size="${size}" fill="${color}">${esc(label)}</text>`,
+// ------------------------------------------------------------------ screens
+
+function titleScreen() {
+  const W = 860, H = 300;
+  let b = `<defs><linearGradient id="sky" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#1a1036"/><stop offset=".55" stop-color="#4a2a7a"/><stop offset="1" stop-color="#c76a9a"/></linearGradient></defs>
+<rect width="${W}" height="${H}" fill="url(#sky)"/>`;
+  // stars
+  let seed = 7; const rnd = () => ((seed = (seed * 9301 + 49297) % 233280) / 233280);
+  for (let i = 0; i < 46; i++) {
+    const x = Math.floor(rnd() * W), y = Math.floor(rnd() * 170), s = rnd() > 0.85 ? 4 : 2;
+    b += `<rect x="${x}" y="${y}" width="${s}" height="${s}" fill="${P.ink}" class="tw" style="animation-delay:${(rnd() * 2.4).toFixed(2)}s"/>`;
+  }
+  // moon
+  b += `<rect x="44" y="18" width="44" height="44" fill="#fff1c9"/><rect x="40" y="22" width="52" height="36" fill="#fff1c9"/><rect x="54" y="30" width="8" height="8" fill="#f3dca0"/><rect x="72" y="44" width="6" height="6" fill="#f3dca0"/>`;
+  // towers left and right, built from bricks
+  const tower = (x0, w, h, flip) => {
+    let t = "";
+    for (let y = H - h; y < H; y += 12) for (let x = x0; x < x0 + w; x += 24) {
+      const off = ((y / 12) % 2) * 12;
+      t += `<rect x="${x + off - 12}" y="${y}" width="22" height="10" fill="#2a1a4d"/>`;
+    }
+    t += `<rect x="${x0 - 12}" y="${H - h - 12}" width="${w + 12}" height="12" fill="#2a1a4d"/>`;
+    for (let x = x0 - 12; x < x0 + w; x += 24) t += `<rect x="${x}" y="${H - h - 24}" width="12" height="12" fill="#2a1a4d"/>`;
+    t += `<rect x="${x0 + w / 2 - 10}" y="${H - h + 30}" width="20" height="28" fill="#ffd166" opacity=".8"/>`;
+    return `<g clip-path="url(#clip${flip})">${t}</g><clipPath id="clip${flip}"><rect x="${x0 - 12}" y="0" width="${w + 12}" height="${H}"/></clipPath>`;
   };
+  b += tower(0, 108, 190, 0) + tower(W - 108, 120, 230, 1);
+  // floating platforms + hopping hero
+  const plat = (x, y, w) => `<rect x="${x}" y="${y}" width="${w}" height="10" fill="#c9b8ff"/><rect x="${x}" y="${y + 10}" width="${w}" height="4" fill="#7b62c9"/>`;
+  b += plat(150, 250, 84) + plat(640, 212, 72) + plat(560, 262, 60);
+  b += `<g class="hop">${sprite(178, 210, 4)}</g>`;
+  // rose
+  b += `<rect x="664" y="196" width="8" height="8" fill="${P.rose}"/><rect x="660" y="200" width="4" height="4" fill="#b3123f"/><rect x="667" y="204" width="2" height="8" fill="${P.mint}"/>`;
+  // title
+  b += pixelText("ABDELRAHMAN", W / 2, 62, 8, P.gold, { anchor: "middle", shadow: "#7a2a4a" });
+  b += pixelText("MAGDY", W / 2, 132, 5, P.ink, { anchor: "middle", shadow: "#4a2a7a" });
+  b += pixelText(`FRONTEND DEV · LV ${level}`, W / 2, 182, 3, P.lilac, { anchor: "middle" });
+  b += pixelText("> PRESS START", W / 2, 222, 4, P.ink, { anchor: "middle", extra: 'class="blink"' });
+  b += `<rect width="${W}" height="${H}" fill="none" stroke="${P.gold}" stroke-width="6"/>`;
+  return doc(W, H, b);
 }
-function chipsRow(x, y, items, opts) {
-  let out = "", cx = x;
-  for (const [label, color] of items) {
-    const c = chip(cx, y, label, color, opts);
-    out += c.svg;
-    cx += c.w + (opts?.gap ?? 10);
+
+function menuButton(label, color) {
+  const s = 3, w = pxWidth(label, s) + 64, h = 46;
+  let b = frame(0, 0, w, h, { edge: color, fill: P.panel, s: 3 });
+  b += `<path d="M18 17h4v4h4v4h-4v4h-4z" fill="${color}" class="blink"/>`;
+  b += pixelText(label, 36, 16, s, P.ink);
+  return doc(w, h, b);
+}
+
+function playerCard() {
+  const W = 860, H = 330;
+  let b = frame(0, 0, W, H);
+  b += pixelText("PLAYER 1", 32, 30, 3, P.gold);
+  b += pixelText(`HI-SCORE ${n(yearTotal)}`, W - 32, 30, 3, P.gold, { anchor: "end" });
+  // portrait
+  b += `<rect x="32" y="62" width="128" height="128" fill="${P.night}"/><rect x="36" y="66" width="120" height="120" fill="#4a3590"/>`;
+  b += `<g class="hop" style="animation-duration:1.4s">${sprite(68, 92, 8)}</g>`;
+  b += `<rect x="36" y="170" width="120" height="16" fill="#6b52b8"/>`;
+  // identity
+  b += `<text x="186" y="88" class="mb" font-size="22" fill="${P.ink}">ABDELRAHMAN</text>`;
+  b += `<text x="186" y="114" class="m" font-size="15" fill="${P.dim}">class: Frontend Developer · realm: Egypt</text>`;
+  for (let i = 0; i < 3; i++) b += heart(186 + i * 34, 132, 4, P.rose);
+  b += coin(302, 133, 5);
+  b += `<text x="334" y="155" class="mb" font-size="17" fill="${P.gold}">× ${S.publicRepos}</text><text x="378" y="155" class="m" font-size="14" fill="${P.dim}">public repos</text>`;
+  // level + XP
+  b += pixelText(`LV ${level}`, 186, 176, 3, P.mint);
+  b += meter(260, 175, 420, 16, xp / LEVEL_XP, P.mint, { delay: 0.2 });
+  b += `<text x="${W - 32}" y="190" text-anchor="end" class="m" font-size="14" fill="${P.dim}">${n(xp)}/${n(LEVEL_XP)} XP</text>`;
+  // stat rows
+  const rows = [
+    ["CURRENT STREAK", `${st.current} days`, st.current / Math.max(st.longest, 1), P.rose],
+    ["LONGEST STREAK", `${st.longest} days`, 1, P.gold],
+    ["ACTIVE DAYS", `${activeDays}/${days.length}`, activeDays / days.length, P.sky],
+    ["BEST COMBO", `${best.count} in a day`, 1, P.lilac],
+  ];
+  rows.forEach(([k, v, r, c], i) => {
+    const col = i % 2, row = Math.floor(i / 2);
+    const x = 32 + col * 412, y = 224 + row * 44;
+    b += `<g class="in" style="animation-delay:${0.3 + i * 0.12}s">${pixelText(k, x, y, 2, P.dim)}
+${meter(x, y + 20, 230, 12, r, c, { seg: 8, delay: 0.4 + i * 0.12 })}
+<text x="${x + 392}" y="${y + 31}" text-anchor="end" class="mb" font-size="15" fill="${P.ink}">${v}</text></g>`;
+  });
+  return doc(W, H, b, ["mono", "monob"]);
+}
+
+function climbChart() {
+  const W = 860, H = 300;
+  // Weekly totals for the last 26 weeks, drawn as brick towers the hero climbs.
+  const weeks = [];
+  for (let i = days.length; i > 0 && weeks.length < 26; i -= 7) {
+    const chunk = days.slice(Math.max(0, i - 7), i);
+    weeks.unshift({ end: chunk.at(-1).date, start: chunk[0].date, sum: chunk.reduce((s, d) => s + d.count, 0) });
   }
-  return { svg: out, w: cx - x };
-}
-
-// Tiny line icons, drawn on a 24x24 grid.
-const ICON = {
-  calendar: `<rect x="3" y="5" width="18" height="16" rx="3"/><path d="M3 10h18M8 3v4M16 3v4"/>`,
-  flame: `<path d="M12 3c1 4 6 6 6 11a6 6 0 0 1-12 0c0-3 2-4 2-7 2 1 3 3 3 5 1-2 1-6 1-9z"/>`,
-  trophy: `<path d="M7 4h10v5a5 5 0 0 1-10 0zM7 6H4a3 3 0 0 0 3 4M17 6h3a3 3 0 0 1-3 4M12 14v4M8 21h8"/>`,
-  bars: `<path d="M5 20V12M10 20V6M15 20v-9M20 20V4"/>`,
-  folder: `<path d="M3 7a2 2 0 0 1 2-2h4l2 2h8a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/>`,
-  check: `<rect x="3" y="3" width="18" height="18" rx="4"/><path d="M8 12l3 3 5-6"/>`,
-  bolt: `<path d="M13 2L4 14h7l-1 8 9-12h-7z"/>`,
-  arrow: `<path d="M7 17L17 7M9 7h8v8"/>`,
-};
-const icon = (name, x, y, s = 24, color = C.ink, sw = 2.2) =>
-  `<g transform="translate(${x} ${y}) scale(${s / 24})" fill="none" stroke="${color}" stroke-width="${sw}" stroke-linecap="round" stroke-linejoin="round">${ICON[name]}</g>`;
-
-// ---------------------------------------------------------------- cards
-
-function hero() {
-  const W = 860, H = 236;
-  let b = panel(0, 0, W, H);
-  // Logo tile
-  b += `<g class="pop" style="animation-delay:.05s">${tile(34, 56, 100, 100, ["#f4f5ff", C.rose[0]], { r: 22, ledgeH: 9, tilt: -4 })}
-<text x="84" y="128" text-anchor="middle" class="d" font-size="66" fill="${C.panel}" transform="rotate(-4 84 106)">A</text></g>`;
-  // Title with highlighted name
-  const hi = "Hi, I'm ";
-  const name = "Abdelrahman";
-  const fs = 44, tx = 166, ty = 104;
-  const hiW = width(hi, "display", fs);
-  const nameW = width(name, "display", fs);
-  b += `<g class="pop" style="animation-delay:.18s"><text x="${tx}" y="${ty}" class="d" font-size="${fs}" fill="${C.ink}">${hi}</text>
-${tile(tx + hiW - 4, ty - 44, nameW + 22, 56, C.rose, { r: 10, ledgeH: 5, tilt: -1.5, stroke: false })}
-<text x="${tx + hiW + 7}" y="${ty}" class="d" font-size="${fs}" fill="${C.ink}" transform="rotate(-1.5 ${tx + hiW + nameW / 2} ${ty - 16})">${name}</text></g>`;
-  b += `<text x="${tx}" y="${ty + 36}" class="b fade" style="animation-delay:.35s" font-size="17.5" fill="${C.soft}">Frontend developer building fast, animated React &amp; Next.js apps.</text>`;
-  const row = chipsRow(tx, ty + 58, [
-    ["React & Next.js", C.blue], ["GSAP motion", C.green], ["Arabic RTL UIs", C.amber], ["Browser games", C.violet],
-  ], { size: 12.5 });
-  b += `<g class="pop" style="animation-delay:.5s">${row.svg}</g>`;
-  // Sticker
-  const st = "frontend · since 2023";
-  const sw = width(st, "monob", 14) + 26;
-  b += `<g class="pop" style="animation-delay:.7s">${tile(W - sw - 28, 22, sw, 38, [C.coral, "#a8432c"], { r: 10, ledgeH: 5, tilt: 4, stroke: false })}
-<text x="${W - 28 - sw / 2}" y="${46}" text-anchor="middle" class="mb" font-size="14" fill="#2a0f08" transform="rotate(4 ${W - 28 - sw / 2} 41)">${st}</text></g>`;
-  return svgDoc(W, H, b);
-}
-
-function badge(label, sub, [face, ledge], glyph) {
-  const fsz = 14;
-  const wl = width(label, "display", fsz);
-  const ws = sub ? width(sub, "mono", 13) + 14 : 0;
-  const gx = glyph ? 26 : 0;
-  const w = 26 + gx + wl + ws;
-  const h = 40;
-  let b = tile(2, 2, w, h - 8, [face, ledge], { r: 8, ledgeH: 4, stroke: true });
-  let x = 15;
-  if (glyph) { b += glyph(x, 9); x += gx; }
-  b += `<text x="${x}" y="${23}" class="d" font-size="${fsz}" fill="${C.ink}">${esc(label)}</text>`;
-  if (sub) b += `<text x="${x + wl + 12}" y="${23}" class="m" font-size="13" fill="#e6e8ff" opacity=".85">${esc(sub)}</text>`;
-  return svgDoc(w + 6, h, b, sub ? ["display", "mono"] : ["display"]);
-}
-
-function githubPanel() {
-  const W = 860, H = 340;
-  let b = panel(0, 0, W, H);
-  b += `<text x="32" y="56" class="d" font-size="27" fill="${C.ink}">On GitHub</text>`;
-  b += `<text x="${W - 32}" y="52" text-anchor="end" class="m" font-size="14" fill="${C.soft}">redrawn every night · ${fmtDate(today)}</text>`;
-  const big = [
-    { v: n(lastYearTotal), l: ["contributions in", "the last year"], c: C.blue, i: "calendar" },
-    { v: `${st.current} day${st.current === 1 ? "" : "s"}`, l: ["current streak,", st.current ? `since ${fmtDay(st.currentStart)}` : "starts today"], c: C.green, i: "flame" },
-    { v: `${st.longest} days`, l: ["longest streak", "ever"], c: C.amber, i: "trophy" },
-    { v: n(total), l: ["contributions", `since ${firstActiveYear}`], c: C.violet, i: "bars" },
-  ];
-  const tw = 182, th = 124, gap = 16, x0 = 32, y0 = 84;
-  big.forEach((t, k) => {
-    const x = x0 + k * (tw + gap), tilt = [-1.6, 1.4, -1.2, 1.6][k];
-    const cx = x + tw / 2, cy = y0 + th / 2;
-    b += `<g class="pop" style="animation-delay:${0.1 + k * 0.12}s">${tile(x, y0, tw, th, t.c, { tilt })}
-<g transform="rotate(${tilt} ${cx} ${cy})">${icon(t.i, x + tw - 38, y0 + 12, 22)}
-<text x="${x + 16}" y="${y0 + 58}" class="d" font-size="${t.v.length > 7 ? 30 : 34}" fill="${C.ink}">${esc(t.v)}</text>
-<text x="${x + 16}" y="${y0 + 84}" class="m" font-size="13.5" fill="#eef0ff">${esc(t.l[0])}</text>
-<text x="${x + 16}" y="${y0 + 103}" class="m" font-size="13.5" fill="#eef0ff">${esc(t.l[1])}</text></g></g>`;
-  });
-  const small = [
-    { v: n(stats.publicRepos), l: "public repos", c: C.teal, i: "folder" },
-    { v: n(activeDays), l: "active days", c: C.rose, i: "check" },
-    { v: n(best.count), l: `best day · ${fmtDay(best.date)}`, c: C.green, i: "bolt" },
-  ];
-  const sy = 244, sh = 62;
-  let sx = 52;
-  const sws = small.map((s) => 64 + width(s.v, "display", 28) + 12 + width(s.l, "mono", 14) + 20);
-  const totalW = sws.reduce((a, c) => a + c, 0) + gap * (small.length - 1);
-  sx = (W - totalW) / 2;
-  small.forEach((s, k) => {
-    const w = sws[k], tilt = [-1, 1.2, -1.4][k];
-    const cx = sx + w / 2, cy = sy + sh / 2;
-    b += `<g class="pop" style="animation-delay:${0.6 + k * 0.12}s">${tile(sx, sy, w, sh, s.c, { tilt })}
-<g transform="rotate(${tilt} ${cx} ${cy})">${icon(s.i, sx + 18, sy + 19, 24)}
-<text x="${sx + 56}" y="${sy + 41}" class="d" font-size="28" fill="${C.ink}">${esc(s.v)}</text>
-<text x="${sx + 56 + width(s.v, "display", 28) + 12}" y="${sy + 37}" class="m" font-size="14" fill="#eef0ff">${esc(s.l)}</text></g></g>`;
-    sx += w + gap;
-  });
-  return svgDoc(W, H, b);
-}
-
-function heatmap() {
-  const W = 860;
-  // Last 26 full weeks, Sunday to Saturday, ending with today's week.
-  const end = days.length - 1;
-  const lastDow = new Date(days[end].date + "T00:00:00Z").getUTCDay();
-  const weeks = 26;
-  const startIdx = end - lastDow - (weeks - 1) * 7;
-  const slice = days.slice(Math.max(0, startIdx));
-  const sum = slice.reduce((s, d) => s + d.count, 0);
-  const nonzero = slice.map((d) => d.count).filter((c) => c > 0).sort((a, z) => a - z);
-  const q = (p) => nonzero[Math.floor((nonzero.length - 1) * p)] ?? 1;
-  const cuts = [q(0.25), q(0.5), q(0.8)];
-  const level = (c) => (c === 0 ? 0 : c <= cuts[0] ? 1 : c <= cuts[1] ? 2 : c <= cuts[2] ? 3 : 4);
-  const fills = ["#252a50", "#18603d", "#20834f", "#2aa865", "#55d98a"];
-  const texts = ["#5b6196", "#cfeedd", "#e6fff0", "#f4fff8", "#0b3a1f"];
-  const cell = 26, gap = 3, x0 = 44, y0 = 106;
-  const H = y0 + 7 * (cell + gap) + 64;
-  let b = panel(0, 0, W, H);
-  b += `<rect x="18" y="18" width="${W - 36}" height="${H - 36}" rx="16" fill="${C.night[0]}" stroke="#ffffff" stroke-opacity=".06"/>`;
-  b += `<text x="${x0}" y="64" class="d" font-size="26" fill="${C.ink}">${n(sum)}</text>`;
-  b += `<text x="${x0 + width(n(sum), "display", 26) + 10}" y="63" class="m" font-size="16" fill="${C.soft}">contributions in the last 6 months</text>`;
-  let lastMonth = -1;
-  for (let w = 0; w < weeks; w++) {
-    const x = x0 + w * (cell + gap);
-    let colCells = "";
-    for (let r = 0; r < 7; r++) {
-      const i = w * 7 + r;
-      const d = slice[i];
-      if (!d) continue;
-      const dt = new Date(d.date + "T00:00:00Z");
-      if (dt.getUTCDate() === 1 && dt.getUTCMonth() !== lastMonth) {
-        b += `<text x="${x}" y="${y0 - 12}" class="m" font-size="14" fill="${C.soft}">${MONTHS[dt.getUTCMonth()]}</text>`;
-        lastMonth = dt.getUTCMonth();
-      }
-      const lv = level(d.count);
-      const y = y0 + r * (cell + gap);
-      const label = d.count > 999 ? "1k+" : String(d.count);
-      const fs = label.length >= 3 ? 9.5 : 11;
-      colCells += `<rect x="${x}" y="${y}" width="${cell}" height="${cell}" rx="6" fill="${fills[lv]}"/>
-<text x="${x + cell / 2}" y="${y + cell / 2 + fs * 0.36}" text-anchor="middle" class="mb" font-size="${fs}" fill="${texts[lv]}"${lv === 0 ? ' opacity=".9"' : ""}>${label}</text>`;
+  const max = Math.max(...weeks.map((w) => w.sum), 1);
+  const x0 = 40, base = 236, top = 100, cw = 26, gap = 4, brick = 8;
+  let b = frame(0, 0, W, H);
+  const sum = weeks.reduce((s, w) => s + w.sum, 0);
+  b += pixelText("TOWER CLIMB", 32, 30, 3, P.gold);
+  b += `<text x="${W - 32}" y="44" text-anchor="end" class="m" font-size="14" fill="${P.dim}">${n(sum)} contributions · 26 weeks · 1 tower = 1 week</text>`;
+  b += `<rect x="${x0 - 8}" y="${base}" width="${weeks.length * (cw + gap) + 12}" height="6" fill="${P.line}"/>`;
+  let peak = 0, lastLabel = -9;
+  weeks.forEach((w, i) => {
+    const h = Math.max(0, Math.round(((base - top) * w.sum) / max / brick) * brick);
+    const x = x0 + i * (cw + gap);
+    let col = "";
+    for (let y = base - brick; y >= base - h; y -= brick) {
+      const shade = y < base - h + brick ? P.gold : (y / brick) % 2 ? "#7b62c9" : "#8f78dd";
+      col += `<rect x="${x}" y="${y}" width="${cw}" height="${brick - 2}" fill="${shade}"/>`;
     }
-    b += `<g class="fade" style="animation-delay:${(0.03 * w).toFixed(2)}s">${colCells}</g>`;
-  }
-  const ly = y0 + 7 * (cell + gap) + 26;
-  b += `<text x="${x0}" y="${ly}" class="m" font-size="14" fill="${C.soft}">contributions per day</text>`;
-  const lx = x0 + weeks * (cell + gap) - gap;
-  b += `<text x="${lx}" y="${ly}" text-anchor="end" class="m" font-size="14" fill="${C.soft}">More</text>`;
-  const sqEnd = lx - width("More", "mono", 14) - 10;
-  for (let k = 4; k >= 0; k--) b += `<rect x="${sqEnd - 14 - (4 - k) * 18}" y="${ly - 12}" width="14" height="14" rx="3" fill="${fills[k]}"/>`;
-  b += `<text x="${sqEnd - 14 - 4 * 18 - 10}" y="${ly}" text-anchor="end" class="m" font-size="14" fill="${C.soft}">Less</text>`;
-  return svgDoc(W, H, b, ["display", "mono", "monob"]);
-}
-
-function lineChart() {
-  const W = 860, H = 360;
-  const last = days.slice(-30);
-  const sum = last.reduce((s, d) => s + d.count, 0);
-  const max = Math.max(...last.map((d) => d.count), 1);
-  const nice = (v) => { const p = 10 ** Math.floor(Math.log10(v)); return Math.ceil(v / p) * p; };
-  const top = nice(max);
-  const x0 = 76, x1 = W - 46, y0 = 98, y1 = 286;
-  const X = (i) => x0 + (i * (x1 - x0)) / (last.length - 1);
-  const Y = (v) => y1 - (v / top) * (y1 - y0);
-  let b = panel(0, 0, W, H);
-  b += `<rect x="18" y="18" width="${W - 36}" height="${H - 36}" rx="16" fill="${C.night[0]}" stroke="#ffffff" stroke-opacity=".06"/>`;
-  b += `<text x="44" y="64" class="d" font-size="26" fill="${C.ink}">${n(sum)}</text>`;
-  b += `<text x="${44 + width(n(sum), "display", 26) + 10}" y="63" class="m" font-size="16" fill="${C.soft}">contributions in the last 30 days</text>`;
-  for (let k = 0; k <= 4; k++) {
-    const v = Math.round((top * k) / 4), y = Y(v);
-    b += `<line x1="${x0}" x2="${x1}" y1="${y}" y2="${y}" stroke="#3a3e6e" stroke-dasharray="4 5" stroke-opacity="${k ? 1 : 0}"/>
-<text x="${x0 - 12}" y="${y + 5}" text-anchor="end" class="m" font-size="13" fill="${C.soft}">${v}</text>`;
-  }
-  b += `<line x1="${x0}" x2="${x1}" y1="${y1}" y2="${y1}" stroke="#4a4f86"/>`;
-  // Smooth path (Catmull-Rom -> cubic Bezier)
-  const pts = last.map((d, i) => [X(i), Y(d.count)]);
-  let path = `M${pts[0][0]},${pts[0][1]}`;
-  for (let i = 0; i < pts.length - 1; i++) {
-    const p0 = pts[i - 1] || pts[i], p1 = pts[i], p2 = pts[i + 1], p3 = pts[i + 2] || p2;
-    const t = 0.18;
-    const c1 = [p1[0] + (p2[0] - p0[0]) * t, Math.min(y1, p1[1] + (p2[1] - p0[1]) * t)];
-    const c2 = [p2[0] - (p3[0] - p1[0]) * t, Math.min(y1, p2[1] - (p3[1] - p1[1]) * t)];
-    path += ` C${c1[0].toFixed(1)},${c1[1].toFixed(1)} ${c2[0].toFixed(1)},${c2[1].toFixed(1)} ${p2[0].toFixed(1)},${p2[1].toFixed(1)}`;
-  }
-  b += `<path d="${path} L${x1},${y1} L${x0},${y1} Z" fill="${C.coral}" fill-opacity=".16" class="fade" style="animation-delay:1s"/>`;
-  b += `<path d="${path}" fill="none" stroke="${C.coral}" stroke-width="3.5" stroke-linecap="round" stroke-linejoin="round" pathLength="1" stroke-dasharray="1" stroke-dashoffset="1"><animate attributeName="stroke-dashoffset" from="1" to="0" dur="1.6s" begin="0.2s" fill="freeze" calcMode="spline" keySplines=".4 0 .2 1" keyTimes="0;1"/></path>`;
-  pts.forEach(([x, y], i) => {
-    b += `<circle cx="${x}" cy="${y}" r="5" fill="${C.coral}" stroke="${C.night[0]}" stroke-width="2.5" class="pop" style="animation-delay:${(0.25 + i * 0.05).toFixed(2)}s"/>`;
+    if (!h) col += `<rect x="${x}" y="${base - 4}" width="${cw}" height="2" fill="${P.line}"/>`;
+    b += `<g class="rise" style="animation-delay:${(i * 0.04).toFixed(2)}s">${col}</g>`;
+    if (w.sum > (weeks[peak]?.sum ?? 0)) peak = i;
+    const dt = D(w.start);
+    if ((i === 0 || dt.getUTCMonth() !== D(weeks[i - 1].start).getUTCMonth()) && i - lastLabel >= 3) { b += pixelText(MONTHS[dt.getUTCMonth()], x, base + 16, 2, P.dim); lastLabel = i; }
   });
-  let month = -1;
-  last.forEach((d, i) => {
-    const dt = new Date(d.date + "T00:00:00Z");
-    b += `<text x="${X(i)}" y="${y1 + 24}" text-anchor="middle" class="m" font-size="12.5" fill="${C.soft}">${dt.getUTCDate()}</text>`;
-    if (dt.getUTCMonth() !== month) {
-      b += `<text x="${X(i)}" y="${y1 + 44}" text-anchor="middle" class="m" font-size="12.5" fill="${C.ink}">${MONTHS[dt.getUTCMonth()]}</text>`;
-      month = dt.getUTCMonth();
-    }
+  // flag on the highest week, hero on the latest
+  const px = x0 + peak * (cw + gap), ph = Math.round(((base - top) * weeks[peak].sum) / max / brick) * brick;
+  b += `<rect x="${px + 12}" y="${base - ph - 30}" width="3" height="28" fill="${P.ink}"/><rect x="${px + 15}" y="${base - ph - 30}" width="14" height="9" fill="${P.rose}"/>`;
+  b += `<text x="${px + 34}" y="${base - ph - 21}" class="mb" font-size="13" fill="${P.ink}">${weeks[peak].sum}</text>`;
+  const lx = x0 + (weeks.length - 1) * (cw + gap), lh = Math.round(((base - top) * weeks.at(-1).sum) / max / brick) * brick;
+  b += `<g class="hop">${sprite(lx - 1, base - lh - 34, 4)}</g>`;
+  return doc(W, H, b, ["mono", "monob"]);
+}
+
+function banner(label, color) {
+  const s = 4, tw = pxWidth(label, s);
+  const W = 860, H = 52;
+  let b = `<rect x="0" y="22" width="${W}" height="4" fill="${P.line}"/>`;
+  b += `<rect x="${(W - tw) / 2 - 28}" y="4" width="${tw + 56}" height="${H - 8}" fill="${P.night}"/>`;
+  b += `<path d="M${(W - tw) / 2 - 28} 18h6v6h6v6h-6v6h-6z" fill="${color}" class="blink"/>`;
+  b += pixelText(label, W / 2, 12, s, color, { anchor: "middle" });
+  return doc(W, H, b);
+}
+
+function levelRow(i, { name, stars, status, statusColor, desc, items, accent, play }) {
+  const W = 860, H = 128;
+  let b = `<g class="in" style="animation-delay:${0.1 + i * 0.08}s">${frame(0, 0, W, H, { edge: accent })}`;
+  b += `<rect x="24" y="24" width="96" height="80" fill="${P.night}"/><rect x="28" y="28" width="88" height="72" fill="${P.panel2}"/>`;
+  b += pixelText(String(i + 1), 72, 36, 6, accent, { anchor: "middle", shadow: P.night });
+  b += pixelText("LEVEL", 72, 86, 2, P.dim, { anchor: "middle" });
+  b += pixelText(name, 144, 26, 4, P.ink);
+  const sx = 144 + pxWidth(name, 4) + 18;
+  for (let k = 0; k < 3; k++) b += pixelText("★", sx + k * 22, 26, 3, k < stars ? P.gold : P.line);
+  b += `<text x="144" y="80" class="b" font-size="16" fill="${P.ink}">${desc}</text>`;
+  let ix = 144;
+  items.forEach((it) => {
+    const w = it.length * 8.4 + 18;
+    b += `<rect x="${ix}" y="92" width="${w}" height="22" fill="${P.night}"/><rect x="${ix + 2}" y="94" width="${w - 4}" height="18" fill="${P.panel2}"/>
+<text x="${ix + w / 2}" y="108" text-anchor="middle" class="mb" font-size="12" fill="${P.lilac}">${it}</text>`;
+    ix += w + 8;
   });
-  return svgDoc(W, H, b, ["display", "mono"]);
-}
-
-function terminal() {
-  const W = 860, H = 318;
-  const lines = [
-    ["$", "whoami"],
-    ["b", "abdelrahman", "  ·  frontend developer  ·  Egypt"],
-    ["o", "I build React & Next.js apps, admin dashboards, landing pages and browser games."],
-    ["$", "cat now.txt"],
-    ["→", "Shipping client apps with Next.js, Redux Toolkit & GSAP"],
-    ["→", "Tower Jump: online races for up to 4 players"],
-    ["→", "Learning Node.js on the way to full-stack"],
-  ];
-  let b = panel(0, 0, W, H);
-  b += `<rect x="18" y="18" width="${W - 36}" height="${H - 36}" rx="14" fill="#11132a" stroke="#ffffff" stroke-opacity=".07"/>
-<path d="M32 18h${W - 64}a14 14 0 0 1 14 14v18H18V32a14 14 0 0 1 14-14z" fill="#1a1d3c"/>
-<circle cx="42" cy="34" r="6" fill="#ff5f56"/><circle cx="62" cy="34" r="6" fill="#ffbd2e"/><circle cx="82" cy="34" r="6" fill="#27c93f"/>
-<text x="${W / 2}" y="39" text-anchor="middle" class="m" font-size="13.5" fill="${C.mute}">abdelrahman@github: ~</text>`;
-  const x0 = 44, fs = 16;
-  let y = 94, t = 0.3;
-  const cw = width("x", "mono", fs);
-  for (const [kind, a, c] of lines) {
-    if (kind === "$" && y > 94) y += 12;
-    let content, plain;
-    if (kind === "$") { content = `<tspan fill="${C.coral}" class="mb">$ </tspan><tspan fill="${C.ink}" class="mb">${esc(a)}</tspan>`; plain = "$ " + a; }
-    else if (kind === "b") { content = `<tspan fill="${C.ink}" class="mb">${esc(a)}</tspan><tspan fill="${C.soft}">${esc(c)}</tspan>`; plain = a + c; }
-    else if (kind === "→") { content = `<tspan fill="#4ade80">→ </tspan><tspan fill="${C.soft}">${esc(a)}</tspan>`; plain = "→ " + a; }
-    else { content = `<tspan fill="${C.soft}">${esc(a)}</tspan>`; plain = a; }
-    const full = plain.length * cw + 4;
-    const typed = kind === "$";
-    const steps = typed ? plain.length : 3;
-    const dur = typed ? Math.max(0.45, plain.length * 0.055) : 0.2;
-    const vals = Array.from({ length: steps + 1 }, (_, j) => ((full * j) / steps).toFixed(1)).join(";");
-    b += `<clipPath id="l${y}"><rect x="${x0}" y="${y - 18}" height="26" width="0"><animate attributeName="width" values="${vals}" dur="${dur.toFixed(2)}s" begin="${t.toFixed(2)}s" fill="freeze" calcMode="discrete"/></rect></clipPath>
-<text x="${x0}" y="${y}" class="m" font-size="${fs}" clip-path="url(#l${y})">${content}</text>`;
-    t += dur + (typed ? 0.25 : 0.12);
-    y += 28;
+  const sw = pxWidth(status, 2) + 20;
+  b += `<rect x="${W - 28 - sw}" y="26" width="${sw}" height="22" fill="${statusColor}"/>`;
+  b += pixelText(status, W - 28 - sw / 2, 30, 2, P.night, { anchor: "middle" });
+  if (play) {
+    b += `<rect x="${W - 140}" y="70" width="112" height="36" fill="${P.rose}"/><rect x="${W - 140}" y="102" width="112" height="4" fill="#a3244a"/>`;
+    b += `<path d="M${W - 124} 80h4v4h4v4h4v4h-4v4h-4v4h-4z" fill="${P.ink}" class="blink"/>`;
+    b += pixelText("PLAY", W - 100, 81, 3, P.ink);
   }
-  y += 12;
-  b += `<text x="${x0}" y="${y}" class="mb" font-size="${fs}" fill="${C.coral}" opacity="0">$<set attributeName="opacity" to="1" begin="${t.toFixed(2)}s"/></text>
-<rect x="${x0 + cw * 2}" y="${y - 15}" width="${cw}" height="19" fill="${C.ink}" opacity="0"><animate attributeName="opacity" values="1;1;0;0" keyTimes="0;.5;.5;1" dur="1s" begin="${t.toFixed(2)}s" repeatCount="indefinite"/></rect>`;
-  return svgDoc(W, H, b, ["mono", "monob"]);
+  return doc(W, H, b + "</g>", ["body", "monob"]);
 }
 
-function sectionTitle(label, [face, ledge], note) {
-  const fs = 27;
-  const w = width(label, "display", fs) + 36;
-  const nw = note ? width(note, "monob", 14) + 24 : 0;
-  const W = w + (note ? nw + 34 : 0) + 20, H = 74;
-  let b = `<g class="pop">${tile(8, 12, w, 48, [face, ledge], { r: 12, ledgeH: 6, tilt: -2 })}
-<text x="${8 + w / 2}" y="${45}" text-anchor="middle" class="d" font-size="${fs}" fill="${C.ink}" transform="rotate(-2 ${8 + w / 2} 36)">${esc(label)}</text></g>`;
-  if (note) {
-    b += `<g class="fade" style="animation-delay:.25s"><rect x="${w + 30}" y="22" width="${nw}" height="30" rx="7" fill="#1d2044"/>
-<text x="${w + 30 + nw / 2}" y="42" text-anchor="middle" class="mb" font-size="14" fill="${C.ink}">${esc(note)}</text></g>`;
-  }
-  return svgDoc(W, H, b, note ? ["display", "monob"] : ["display"]);
+function footer() {
+  const W = 860, H = 40;
+  const label = `SAVED ${today.getUTCDate()} ${MONTHS[today.getUTCMonth()]} ${today.getUTCFullYear()} · CONTINUE?`;
+  let b = pixelText(label, W / 2, 12, 2, P.dim, { anchor: "middle" });
+  b += `<rect x="${W / 2 + pxWidth(label, 2) / 2 + 8}" y="12" width="8" height="14" fill="${P.gold}" class="blink"/>`;
+  return doc(W, H, b);
 }
 
-function shipCard({ title, status, statusColor, desc, tags, foot, colors, glyph, link }) {
-  const W = 424, H = 288;
-  let b = `<rect x="6" y="6" width="${W - 12}" height="${H - 12}" rx="20" fill="${C.panel}"/><rect x="6" y="6" width="${W - 12}" height="${H - 12}" rx="20" fill="url(#dots)"/>`;
-  b += tile(16, 14, W - 32, H - 40, colors, { r: 18, ledgeH: 7 });
-  // icon tile
-  b += `<rect x="34" y="34" width="68" height="68" rx="16" fill="#0f1124" stroke="#ffffff" stroke-opacity=".18"/>${glyph(34, 34)}`;
-  b += `<text x="118" y="66" class="d" font-size="${width(title, "display", 26) > 250 ? 22 : 26}" fill="${C.ink}">${esc(title)}</text>`;
-  const sc = chip(118, 76, status, statusColor, { size: 12, h: 24, padX: 10, color: "#062612" });
-  b += sc.svg;
-  if (link) b += `${tile(W - 66, 30, 34, 34, [C.coral, "#a8432c"], { r: 8, ledgeH: 3, stroke: false })}${icon("arrow", W - 59, 37, 20, "#2a0f08", 2.6)}`;
-  const dfs = Math.min(16.5, ...desc.map((l) => (16.5 * (W - 70)) / width(l, "body", 16.5)));
-  desc.forEach((line, i) => (b += `<text x="34" y="${136 + i * 23}" class="b" font-size="${dfs.toFixed(1)}" fill="${C.ink}">${esc(line)}</text>`));
-  const ty = 136 + desc.length * 23 + 6;
-  const row = chipsRow(34, ty, tags.map((t) => [t, ["#0f1124", "#0f1124"]]), { size: 12, h: 24, padX: 9, gap: 7, color: "#e6e8ff" });
-  b += row.svg;
-  b += `<text x="34" y="${ty + 52}" class="m" font-size="14" fill="#e9ebff" opacity=".9">${esc(foot)}</text>`;
-  return svgDoc(W, H, `<g class="pop">${b}</g>`);
-}
+// ------------------------------------------------------------------ write
 
-// Card glyphs (64x64 inside the icon tile)
-const glyphs = {
-  tower: (x, y) => `<g transform="translate(${x} ${y})">
-<rect x="14" y="44" width="24" height="5" rx="2.5" fill="#c9b8ff"/><rect x="28" y="33" width="24" height="5" rx="2.5" fill="#c9b8ff"/><rect x="12" y="22" width="22" height="5" rx="2.5" fill="#c9b8ff"/>
-<circle cx="44" cy="20" r="6" fill="#ff5f87"/><circle cx="44" cy="20" r="2.5" fill="#b3123f"/><path d="M44 26v10" stroke="#4ade80" stroke-width="2.5"/>
-<rect x="20" y="12" width="8" height="9" rx="3" fill="#1b1b2e" stroke="#f4f5ff" stroke-width="1.5"/></g>`,
-  briefcase: (x, y) => `<g transform="translate(${x + 12} ${y + 12})" fill="none" stroke="#7fb2ff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="12" width="34" height="23" rx="5"/><path d="M14 12V8a3 3 0 0 1 3-3h6a3 3 0 0 1 3 3v4M3 22h34"/></g>`,
-  monogram: (x, y) => `<text x="${x + 34}" y="${y + 46}" text-anchor="middle" class="d" font-size="34" fill="#f4f5ff">AM</text><rect x="${x + 14}" y="${y + 52}" width="40" height="4" rx="2" fill="#4ade80"/>`,
-  sticker: (x, y) => `<g transform="translate(${x} ${y})"><rect x="12" y="14" width="40" height="36" rx="7" fill="none" stroke="#ffd166" stroke-width="3"/><path d="M18 14v36M46 14v36" stroke="#ffd166" stroke-width="2" stroke-dasharray="4 4"/><path d="M27 25l12 7-12 7z" fill="#ffd166"/></g>`,
-};
-
-// ---------------------------------------------------------------- write
-
+const levels = [
+  { name: "TOWER JUMP", stars: 3, status: "LIVE", statusColor: P.mint, accent: P.rose, play: true,
+    desc: "My browser game: wall jumps, combos, online races.", items: ["PHASER", "TYPESCRIPT", "PWA", "GAMEPAD"] },
+  { name: "CLIENT APPS", stars: 3, status: "10+ CLEARED", statusColor: P.gold, accent: P.sky,
+    desc: "Admin dashboards, agency portals and landing pages, in English and Arabic.", items: ["NEXT.JS", "REDUX TOOLKIT", "TAILWIND", "GSAP"] },
+  { name: "PORTFOLIO", stars: 2, status: "LIVE", statusColor: P.mint, accent: P.lilac,
+    desc: "My personal site: smooth scrolling and GSAP scenes all the way down.", items: ["REACT", "VITE", "GSAP", "LENIS"] },
+  { name: "STICKER MAKER", stars: 2, status: "WINDOWS", statusColor: P.sky, accent: P.mint,
+    desc: "Turns cartoon videos into transparent 512x512 GIF stickers, fully offline.", items: ["PYTHON", "PYSIDE6", "AI CUT-OUT", "FFMPEG"] },
+];
 const files = {
-  "hero.svg": hero(),
-  "badge-linkedin.svg": badge("LinkedIn", null, ["#0a66c2", "#06427e"], (x, y) => `<rect x="${x}" y="${y + 1}" width="17" height="17" rx="3.5" fill="#fff"/><text x="${x + 8.5}" y="${y + 15}" text-anchor="middle" class="d" font-size="12" fill="#0a66c2">in</text>`),
-  "badge-hackerrank.svg": badge("HackerRank", "@abdalrahman_mag1", C.green, (x, y) => `<rect x="${x}" y="${y + 1}" width="17" height="17" rx="3.5" fill="#fff"/><text x="${x + 8.5}" y="${y + 15}" text-anchor="middle" class="d" font-size="12" fill="#1f9160">H</text>`),
-  "badge-site.svg": badge("abdelrahman-magdy.vercel.app", null, ["#23264a", "#121430"], null),
-  "github.svg": githubPanel(),
-  "graph-6m.svg": heatmap(),
-  "graph-30d.svg": lineChart(),
-  "terminal.svg": terminal(),
-  "title-ship.svg": sectionTitle("What I ship", C.amber, "4 things I built"),
-  "title-play.svg": sectionTitle("Play it", C.rose, "runs in your browser"),
-  "title-toolkit.svg": sectionTitle("Daily toolkit", C.blue, null),
-  "card-tower-jump.svg": shipCard({
-    title: "Tower Jump", status: "live · play now", statusColor: ["#4ade80", "#1f8a4c"], colors: ["#2b2f66", "#1b1d45"], glyph: glyphs.tower, link: true,
-    desc: ["A rose-tower climber for the browser:", "wall jumps, combos and online races."],
-    tags: ["Phaser", "TypeScript", "PWA", "Online"], foot: "desktop · phone · gamepad",
-  }),
-  "card-client-work.svg": shipCard({
-    title: "Client apps", status: "10+ shipped", statusColor: ["#4ade80", "#1f8a4c"], colors: ["#1f3b63", "#132640"], glyph: glyphs.briefcase, link: false,
-    desc: ["Admin dashboards, agency portals and", "landing pages, in English and Arabic."],
-    tags: ["Next.js", "Redux Toolkit", "Tailwind", "GSAP"], foot: "4,000+ commits across private repos",
-  }),
-  "card-portfolio.svg": shipCard({
-    title: "Portfolio", status: "live", statusColor: ["#4ade80", "#1f8a4c"], colors: ["#3b2752", "#251735"], glyph: glyphs.monogram, link: true,
-    desc: ["My personal site: smooth scrolling,", "GSAP scenes and a lot of motion."],
-    tags: ["React", "Vite", "GSAP", "Lenis"], foot: "abdelrahman-magdy.vercel.app",
-  }),
-  "card-sticker-maker.svg": shipCard({
-    title: "Sticker Maker", status: "Windows app", statusColor: ["#ffd166", "#a8791c"], colors: ["#2d3a2f", "#1b251d"], glyph: glyphs.sticker, link: false,
-    desc: ["Turns cartoon videos into transparent", "512×512 GIF stickers, fully offline."],
-    tags: ["Python", "PySide6", "AI cut-out", "ffmpeg"], foot: "no install · no internet needed",
-  }),
+  "title.svg": titleScreen(),
+  "btn-linkedin.svg": menuButton("LINKEDIN", P.sky),
+  "btn-hackerrank.svg": menuButton("HACKERRANK", P.mint),
+  "btn-portfolio.svg": menuButton("PORTFOLIO", P.rose),
+  "player.svg": playerCard(),
+  "climb.svg": climbChart(),
+  "banner-levels.svg": banner("SELECT LEVEL", P.gold),
+  "banner-bonus.svg": banner("BONUS STAGE", P.rose),
+  "banner-inventory.svg": banner("INVENTORY", P.sky),
+  "footer.svg": footer(),
 };
-for (const [name, svg] of Object.entries(files)) writeFileSync(join(OUT, name), svg);
-console.log(`wrote ${Object.keys(files).length} files · last year ${lastYearTotal} · streak ${st.current}/${st.longest} · total ${total}`);
+levels.forEach((l, i) => (files[`level-${i + 1}.svg`] = levelRow(i, l)));
+for (const [k, v] of Object.entries(files)) writeFileSync(join(OUT, k), v);
+console.log(`hud: ${Object.keys(files).length} files · LV ${level} · ${xp} XP · streak ${st.current}/${st.longest} · year ${yearTotal}`);
