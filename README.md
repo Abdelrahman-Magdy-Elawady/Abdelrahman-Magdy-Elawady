@@ -1,51 +1,37 @@
-<!-- ============ HEADER ============ -->
 <p align="center">
-  <img width="100%" src="https://capsule-render.vercel.app/api?type=waving&color=0:0f172a,50:1e3a8a,100:06b6d4&height=220&section=header&text=Abdelrahman%20Magdy&fontSize=52&fontColor=ffffff&fontAlignY=36&desc=Frontend%20Developer%20-%20React%20and%20Next.js&descAlignY=58&descSize=18&animation=fadeIn" alt="header" />
+  <img src="./assets/hero.svg" width="100%" alt="Hi, I'm Abdelrahman. Frontend developer building fast, animated React and Next.js apps." />
 </p>
 
 <p align="center">
-  <a href="https://github.com/abdelrahman-magdy-elawady">
-    <img src="https://readme-typing-svg.demolab.com?font=Fira+Code&weight=600&size=22&duration=3000&pause=800&color=06B6D4&center=true&vCenter=true&width=600&lines=Hi+%F0%9F%91%8B+I'm+Abdelrahman;Frontend+Developer+%E2%9A%9B%EF%B8%8F;I+build+fast%2C+pixel-perfect+UIs;React+%E2%80%A2+Next.js+%E2%80%A2+Tailwind;Leveling+up+to+Full-Stack+with+Node.js+%F0%9F%9A%80" alt="Typing SVG" />
-  </a>
+  <a href="https://www.linkedin.com/in/abdelrahman-magdy-elawady/"><img src="./assets/badge-linkedin.svg" height="40" alt="LinkedIn" /></a>
+  <a href="https://www.hackerrank.com/abdalrahman_mag1"><img src="./assets/badge-hackerrank.svg" height="40" alt="HackerRank @abdalrahman_mag1" /></a>
+  <a href="https://abdelrahman-magdy.vercel.app/"><img src="./assets/badge-site.svg" height="40" alt="abdelrahman-magdy.vercel.app" /></a>
 </p>
 
 <p align="center">
-  <img src="https://komarev.com/ghpvc/?username=abdelrahman-magdy-elawady&label=Profile%20views&color=06b6d4&style=for-the-badge" alt="profile views" />
-  <a href="https://www.linkedin.com/in/abdelrahman-magdy-elawady/"><img src="https://img.shields.io/badge/LinkedIn-0A66C2?style=for-the-badge&logo=linkedin&logoColor=white" alt="LinkedIn" /></a>
-  <a href="https://www.hackerrank.com/abdalrahman_mag1"><img src="https://img.shields.io/badge/HackerRank-2EC866?style=for-the-badge&logo=hackerrank&logoColor=white" alt="HackerRank" /></a>
+  <img src="./assets/github.svg" width="100%" alt="On GitHub: contributions in the last year, current and longest streak, total contributions, public repos, active days and best day." />
 </p>
-
----
-
-## 🧑‍💻 About me
 
 <p align="center">
-  <img src="./about.svg" alt="whoami — Abdelrahman Magdy, Frontend Developer" width="100%" />
+  <img src="./assets/graph-6m.svg" width="100%" alt="Contributions per day over the last 6 months" />
 </p>
 
-<details>
-  <summary><b>🔭 What I care about when I build (click to expand)</b></summary>
-  <br />
+<p align="center">
+  <img src="./assets/graph-30d.svg" width="100%" alt="Contributions per day over the last 30 days" />
+</p>
 
-- ⚡ **Performance** — small bundles, fast loads, smooth animations
-- 🎨 **Pixel-perfect UI** — turning Figma designs into real, responsive interfaces
-- ♿ **Accessibility** — semantic HTML and ARIA done right
-- 🧩 **Clean components** — reusable, readable, easy to maintain
+<p align="center">
+  <img src="./assets/terminal.svg" width="100%" alt="whoami: abdelrahman, frontend developer, Egypt. Now: shipping client apps with Next.js, Redux Toolkit and GSAP; Tower Jump online races; learning Node.js." />
+</p>
 
-</details>
+<img src="./assets/title-ship.svg" height="74" alt="What I ship" />
 
-<details>
-  <summary><b>📫 How to reach me (click to expand)</b></summary>
-  <br />
+<p align="center">
+  <a href="https://tower-jump-pi.vercel.app/"><img src="./assets/card-tower-jump.svg" width="49%" alt="Tower Jump: a browser game, play now" /></a><img src="./assets/card-client-work.svg" width="49%" alt="Client apps: 10+ shipped" />
+  <a href="https://abdelrahman-magdy.vercel.app/"><img src="./assets/card-portfolio.svg" width="49%" alt="Portfolio" /></a><img src="./assets/card-sticker-maker.svg" width="49%" alt="Sticker Maker: a Windows app" />
+</p>
 
-- 💼 LinkedIn: [abdelrahman-magdy-elawady](https://www.linkedin.com/in/abdelrahman-magdy-elawady/)
-- 🧠 HackerRank: [abdalrahman_mag1](https://www.hackerrank.com/abdalrahman_mag1)
-
-</details>
-
----
-
-## 🎮 Play my game — Tower Jump
+<img src="./assets/title-play.svg" height="74" alt="Play it" />
 
 <table>
   <tr>
@@ -67,9 +53,7 @@
   </tr>
 </table>
 
----
-
-## 🛠️ Tech Stack
+<img src="./assets/title-toolkit.svg" height="74" alt="Daily toolkit" />
 
 <p align="center">
   <img src="https://skillicons.dev/icons?i=js,ts,html,css,react,nextjs,vite,tailwind,materialui,redux&theme=dark&perline=10" alt="Core stack" />
@@ -77,24 +61,6 @@
   <img src="https://skillicons.dev/icons?i=git,github,githubactions,vercel,figma,postman,vscode&theme=dark&perline=7" alt="Tools" />
 </p>
 
----
-
-## 📊 GitHub stats
-
 <p align="center">
-  <img height="170" src="https://github-readme-stats.vercel.app/api?username=abdelrahman-magdy-elawady&show_icons=true&theme=tokyonight&hide_border=true&bg_color=0d1117&count_private=true" alt="GitHub stats" />
-  <img height="170" src="https://github-readme-stats.vercel.app/api/top-langs?username=abdelrahman-magdy-elawady&layout=compact&theme=tokyonight&hide_border=true&bg_color=0d1117&langs_count=8" alt="Top languages" />
-</p>
-
-<p align="center">
-  <img src="https://streak-stats.demolab.com/?user=abdelrahman-magdy-elawady&theme=tokyonight&hide_border=true&background=0d1117" alt="GitHub streak" />
-</p>
-
-<p align="center">
-  <img width="100%" src="https://github-readme-activity-graph.vercel.app/graph?username=abdelrahman-magdy-elawady&theme=tokyo-night&hide_border=true&bg_color=0d1117&area=true" alt="Contribution graph" />
-</p>
-
-<!-- ============ FOOTER ============ -->
-<p align="center">
-  <img width="100%" src="https://capsule-render.vercel.app/api?type=waving&color=0:06b6d4,50:1e3a8a,100:0f172a&height=120&section=footer" alt="footer" />
+  <sub>Drawn in my own README design system · numbers redrawn every night by a GitHub Action</sub>
 </p>
